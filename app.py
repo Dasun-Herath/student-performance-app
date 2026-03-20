@@ -79,6 +79,9 @@ if st.button("🚀 Analyze Performance"):
     else:
         performance = "Needs Improvement"
 
+    # 📊 Class Average (NEW 🔥)
+    class_avg = 60
+
     # 📊 Results
     st.markdown(f"""
     ## 📊 Results for {name if name else "Student"}
@@ -88,7 +91,16 @@ if st.button("🚀 Analyze Performance"):
     - **Performance:** {performance}
     - **Weak Subject:** 🔴 {weak}
     - **Strong Subject:** 🟢 {strong}
+    - **Class Average:** {class_avg}
     """)
+
+    # 📈 Comparison (NEW 🔥)
+    if avg > class_avg:
+        st.success("🎉 You are ABOVE class average!")
+    elif avg == class_avg:
+        st.info("😐 You are EXACTLY at class average.")
+    else:
+        st.warning("⚠️ You are BELOW class average. Try to improve!")
 
     # 📈 Progress
     st.progress(int(avg))
@@ -119,6 +131,7 @@ Name: {name}
 Average: {avg}
 Grade: {grade}
 Performance: {performance}
+Class Average: {class_avg}
 Weak Subject: {weak}
 Strong Subject: {strong}
 """
