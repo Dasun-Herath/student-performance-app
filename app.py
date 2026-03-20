@@ -38,15 +38,15 @@ if st.button("Analyze Performance"):
 
     # AI Advice
     advice_dict = {
-        "Maths": "Practice maths problems daily and improve problem solving skills.",
-        "Science": "Revise science concepts and use diagrams for better understanding.",
-        "English": "Improve reading, writing, and vocabulary skills.",
-        "Sinhala": "Practice grammar and essay writing regularly.",
-        "History": "Study timelines and important events.",
-        "ICT": "Improve practical and computer skills."
+        "Maths": "Practice maths problems daily.",
+        "Science": "Revise concepts with diagrams.",
+        "English": "Improve reading and vocabulary.",
+        "Sinhala": "Practice grammar and writing.",
+        "History": "Study important events.",
+        "ICT": "Improve practical skills."
     }
 
-    advice = advice_dict.get(weak, "Keep practicing all subjects.")
+    advice = advice_dict.get(weak, "Keep practicing.")
 
     # Results
     st.subheader("📊 Results")
@@ -55,7 +55,17 @@ if st.button("Analyze Performance"):
     st.write(f"**Weak Subject:** {weak}")
     st.write(f"**Strong Subject:** {strong}")
 
-    st.success(f"📌 Advice: {advice}")
+    # Progress bar
+    st.subheader("Progress")
+    st.progress(int(avg))
+
+    # Performance message
+    if performance == "Excellent":
+        st.success("Excellent Work! 🎉")
+    elif performance == "Good":
+        st.info("Good Job 👍")
+    else:
+        st.warning("Need Improvement ⚠️")
 
     # Chart
     st.subheader("📈 Subject Performance")
@@ -63,36 +73,25 @@ if st.button("Analyze Performance"):
         "Subjects": subjects,
         "Marks": marks
     })
-
     st.bar_chart(df_chart.set_index("Subjects"))
-    st.subheader("Progress")
-st.progress(int(avg))
-if performance == "Excellent":
-    st.success("Excellent Work! 🎉")
-elif performance == "Good":
-    st.info("Good Job 👍")
-else:
-    st.warning("Need Improvement ⚠️")
-    import pandas as pd
 
-df_chart = pd.DataFrame({
-    "Subjects": subjects,
-    "Marks": marks
-})
+    # Final advice upgrade
+    if avg < 50:
+        final_advice = "Study more and focus on basics."
+    elif avg < 65:
+        final_advice = "Practice past papers."
+    else:
+        final_advice = "Keep up the good work!"
 
-st.bar_chart(df_chart.set_index("Subjects"))
-if avg < 50:
-    advice = "You should study more and focus on basics."
-elif avg < 65:
-    advice = "Practice past papers and improve weak areas."
-else:
-    advice = "Keep up the good work!"
+    st.success(f"📌 Advice: {final_advice}")
+
+    # Download report
     result_text = f"""
 Average: {avg}
 Performance: {performance}
 Weak Subject: {weak}
 Strong Subject: {strong}
-Advice: {advice}
+Advice: {final_advice}
 """
 
-st.download_button("📥 Download Report", result_text)
+    st.download_button("📥 Download Report", result_text)
