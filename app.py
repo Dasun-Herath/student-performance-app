@@ -24,6 +24,10 @@ st.markdown("""
 # 🎓 TITLE
 st.markdown("<h1 style='text-align: center; color: #4CAF50;'>🎓 AI Student Performance Analyzer</h1>", unsafe_allow_html=True)
 
+# 🧠 SESSION STATE (NEW 🔥)
+if "students" not in st.session_state:
+    st.session_state.students = []
+
 # 📌 SIDEBAR
 st.sidebar.header("📊 Student Info")
 name = st.sidebar.text_input("Enter Student Name")
@@ -57,7 +61,7 @@ if st.button("🚀 Analyze Performance"):
     weak = subjects[marks.index(min(marks))]
     strong = subjects[marks.index(max(marks))]
 
-    # 🎯 Grade Prediction
+    # 🎯 Grade
     if avg >= 75:
         grade = "A"
     elif avg >= 65:
@@ -69,17 +73,7 @@ if st.button("🚀 Analyze Performance"):
     else:
         grade = "F"
 
-    # 🎯 Performance
-    if avg >= 80:
-        performance = "Excellent"
-    elif avg >= 65:
-        performance = "Good"
-    elif avg >= 50:
-        performance = "Average"
-    else:
-        performance = "Needs Improvement"
-
-    # 🏆 NEW FEATURE — Ranking System
+    # 🏆 Rank
     if avg >= 85:
         rank = "🥇 Top Performer"
     elif avg >= 70:
@@ -89,52 +83,28 @@ if st.button("🚀 Analyze Performance"):
     else:
         rank = "⚠️ Needs Improvement"
 
-    # 📊 Class Average
-    class_avg = 60
+    # 📊 Save student (NEW 🔥)
+    student_data = {
+        "Name": name if name else "Unknown",
+        "Average": avg,
+        "Grade": grade,
+        "Rank": rank
+    }
+    st.session_state.students.append(student_data)
 
     # 📊 Results
     st.markdown(f"""
     ## 📊 Results for {name if name else "Student"}
 
-    - **Average Score:** {round(avg,2)}
+    - **Average:** {round(avg,2)}
     - **Grade:** {grade}
-    - **Performance:** {performance}
     - **Rank:** {rank}
     - **Weak Subject:** 🔴 {weak}
     - **Strong Subject:** 🟢 {strong}
-    - **Class Average:** {class_avg}
     """)
-
-    # 📈 Comparison
-    if avg > class_avg:
-        st.success("🎉 You are ABOVE class average!")
-    elif avg == class_avg:
-        st.info("😐 You are EXACTLY at class average.")
-    else:
-        st.warning("⚠️ You are BELOW class average. Try to improve!")
 
     # 📈 Progress
     st.progress(int(avg))
-
-    # 📚 Study Advice
-    if study_hours < 2:
-        st.warning("Increase study time!")
-    elif study_hours < 4:
-        st.info("Good, but can improve.")
-    else:
-        st.success("Great study habit!")
-
-    # 🔥 Weak Subject Suggestions
-    resources = {
-        "Maths": "📘 Practice maths problems daily.",
-        "Science": "🔬 Use diagrams and experiments.",
-        "English": "📖 Improve reading and writing.",
-        "Sinhala": "✍️ Practice grammar.",
-        "History": "📅 Study timelines.",
-        "ICT": "💻 Practice computer skills."
-    }
-
-    st.info(f"📚 Suggestion for {weak}: {resources.get(weak)}")
 
     # 📊 Chart
     df = pd.DataFrame({
@@ -148,18 +118,20 @@ if st.button("🚀 Analyze Performance"):
     ax.pie(marks, labels=subjects, autopct='%1.1f%%')
     st.pyplot(fig)
 
-    # 📥 Download
-    result_text = f"""
-Name: {name}
-Average: {avg}
-Grade: {grade}
-Performance: {performance}
-Rank: {rank}
-Class Average: {class_avg}
-Weak Subject: {weak}
-Strong Subject: {strong}
-"""
-    st.download_button("📥 Download Report", result_text)
+# 📋 SHOW ALL STUDENTS (NEW 🔥)
+if st.session_state.students:
+    st.markdown("## 📋 Student Records")
+
+    df_all = pd.DataFrame(st.session_state.students)
+    st.dataframe(df_all)
+
+    # 🏆 Top Performer
+    top_student = df_all.loc[df_all["Average"].idxmax()]
+    st.success(f"🏆 Top Performer: {top_student['Name']} ({round(top_student['Average'],2)})")
+
+    # 📥 Download all data
+    csv = df_all.to_csv(index=False).encode('utf-8')
+    st.download_button("📥 Download All Data", csv, "students.csv", "text/csv")
 
 # 🧾 FOOTER
 st.markdown("---")
