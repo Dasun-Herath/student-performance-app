@@ -53,6 +53,19 @@ if st.button("🚀 Analyze Performance"):
     subjects = ["Maths","Science","English","Sinhala","History","ICT"]
 
     avg = sum(marks) / len(marks)
+    # 🎯 Grade Prediction
+if avg >= 75:
+    grade = "A"
+elif avg >= 65:
+    grade = "B"
+elif avg >= 55:
+    grade = "C"
+elif avg >= 40:
+    grade = "S"
+else:
+    grade = "F"
+
+st.write(f"🎯 Predicted Grade: {grade}")
 
     weak = subjects[marks.index(min(marks))]
     strong = subjects[marks.index(max(marks))]
