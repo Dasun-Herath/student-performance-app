@@ -95,3 +95,41 @@ Advice: {final_advice}
 """
 
     st.download_button("📥 Download Report", result_text)
+    st.markdown("""
+    <style>
+    .main {
+        background-color: #0E1117;
+        color: white;
+    }
+    .stButton>button {
+        background-color: #4CAF50;
+        color: white;
+        border-radius: 10px;
+        height: 3em;
+        width: 100%;
+    }
+    </style>
+""", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align: center; color: #4CAF50;'>🎓 Student Performance Analyzer</h1>", unsafe_allow_html=True)
+    col1, col2 = st.columns(2)
+
+with col1:
+    maths = st.number_input("Mathematics", 0, 100)
+    science = st.number_input("Science", 0, 100)
+    english = st.number_input("English", 0, 100)
+
+with col2:
+    sinhala = st.number_input("Sinhala", 0, 100)
+    history = st.number_input("History", 0, 100)
+    ict = st.number_input("ICT", 0, 100)
+    st.markdown(f"""
+### 📊 Results
+
+- **Average Score:** {round(avg,2)}
+- **Performance:** {performance}
+- **Weak Subject:** 🔴 {weak}
+- **Strong Subject:** 🟢 {strong}
+""")
+    st.markdown("### 📈 Performance Chart")
+st.bar_chart(df_chart.set_index("Subjects"))
+
