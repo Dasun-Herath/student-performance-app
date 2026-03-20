@@ -1,12 +1,13 @@
 import streamlit as st
 import pandas as pd
+import matplotlib.pyplot as plt
 
-st.set_page_config(page_title="Student Performance Analyzer", layout="centered")
+st.set_page_config(page_title="Student Performance Analyzer", layout="wide")
 
-# 🎨 UI STYLE
+# 🎨 STYLE
 st.markdown("""
     <style>
-    .main {
+    body {
         background-color: #0E1117;
         color: white;
     }
@@ -21,11 +22,18 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # 🎓 TITLE
-st.markdown("<h1 style='text-align: center; color: #4CAF50;'>🎓 Student Performance Analyzer</h1>", unsafe_allow_html=True)
+st.markdown("<h1 style='text-align: center; color: #4CAF50;'>🎓 AI Student Performance Analyzer</h1>", unsafe_allow_html=True)
 
-st.write("Enter your marks:")
+# 📌 SIDEBAR
+st.sidebar.header("📊 Student Info")
+name = st.sidebar.text_input("Enter Student Name")
 
-# 📥 INPUTS (2 columns)
+st.sidebar.markdown("---")
+st.sidebar.info("Fill marks and click Analyze")
+
+# 📥 INPUTS
+st.write("### Enter your marks")
+
 col1, col2 = st.columns(2)
 
 with col1:
@@ -39,7 +47,7 @@ with col2:
     ict = st.number_input("ICT", 0, 100)
 
 # 🔘 BUTTON
-if st.button("Analyze Performance"):
+if st.button("🚀 Analyze Performance"):
 
     marks = [maths, science, english, sinhala, history, ict]
     subjects = ["Maths","Science","English","Sinhala","History","ICT"]
@@ -61,15 +69,15 @@ if st.button("Analyze Performance"):
 
     # 🧠 Advice
     if avg < 50:
-        final_advice = "Study more and focus on basics."
+        advice = "Study more and focus on basics."
     elif avg < 65:
-        final_advice = "Practice past papers."
+        advice = "Practice past papers."
     else:
-        final_advice = "Keep up the good work!"
+        advice = "Keep up the good work!"
 
     # 📊 RESULTS
     st.markdown(f"""
-    ### 📊 Results
+    ## 📊 Results for {name if name else "Student"}
 
     - **Average Score:** {round(avg,2)}
     - **Performance:** {performance}
@@ -77,36 +85,45 @@ if st.button("Analyze Performance"):
     - **Strong Subject:** 🟢 {strong}
     """)
 
-    # 📈 Progress bar
-    st.subheader("Progress")
+    # 📈 Progress
     st.progress(int(avg))
 
-    # 🎨 Performance message
+    # 🎨 Message
     if performance == "Excellent":
-        st.success("Excellent Work! 🎉")
+        st.success("🌟 Excellent Work!")
     elif performance == "Good":
-        st.info("Good Job 👍")
+        st.info("👍 Good Job!")
     else:
-        st.warning("Need Improvement ⚠️")
+        st.warning("⚠️ Need Improvement")
 
-    # 📊 Chart
-    st.markdown("### 📈 Performance Chart")
-    df_chart = pd.DataFrame({
+    # 📊 Bar Chart
+    df = pd.DataFrame({
         "Subjects": subjects,
         "Marks": marks
     })
-    st.bar_chart(df_chart.set_index("Subjects"))
+    st.markdown("### 📈 Bar Chart")
+    st.bar_chart(df.set_index("Subjects"))
+
+    # 🥧 Pie Chart
+    st.markdown("### 🥧 Subject Distribution")
+    fig, ax = plt.subplots()
+    ax.pie(marks, labels=subjects, autopct='%1.1f%%')
+    st.pyplot(fig)
 
     # 💡 Advice
-    st.success(f"📌 Advice: {final_advice}")
+    st.success(f"📌 Advice: {advice}")
 
     # 📥 Download
     result_text = f"""
+Name: {name}
 Average: {avg}
 Performance: {performance}
 Weak Subject: {weak}
 Strong Subject: {strong}
-Advice: {final_advice}
+Advice: {advice}
 """
-
     st.download_button("📥 Download Report", result_text)
+
+# 🧾 FOOTER
+st.markdown("---")
+st.markdown("👨‍💻 Developed by Dasun | AI Project")
