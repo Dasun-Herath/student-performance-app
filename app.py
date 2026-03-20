@@ -79,6 +79,16 @@ if st.button("🚀 Analyze Performance"):
     else:
         performance = "Needs Improvement"
 
+    # 🏆 NEW FEATURE — Ranking System
+    if avg >= 85:
+        rank = "🥇 Top Performer"
+    elif avg >= 70:
+        rank = "🥈 Good Performer"
+    elif avg >= 55:
+        rank = "🥉 Average Performer"
+    else:
+        rank = "⚠️ Needs Improvement"
+
     # 📊 Class Average
     class_avg = 60
 
@@ -89,6 +99,7 @@ if st.button("🚀 Analyze Performance"):
     - **Average Score:** {round(avg,2)}
     - **Grade:** {grade}
     - **Performance:** {performance}
+    - **Rank:** {rank}
     - **Weak Subject:** 🔴 {weak}
     - **Strong Subject:** 🟢 {strong}
     - **Class Average:** {class_avg}
@@ -113,17 +124,17 @@ if st.button("🚀 Analyze Performance"):
     else:
         st.success("Great study habit!")
 
-    # 🔥 NEW FEATURE — Weak Subject Smart Suggestions
+    # 🔥 Weak Subject Suggestions
     resources = {
-        "Maths": "📘 Practice maths problems daily and focus on weak areas.",
-        "Science": "🔬 Revise concepts using diagrams and experiments.",
-        "English": "📖 Improve reading, writing and vocabulary skills.",
-        "Sinhala": "✍️ Practice grammar and essay writing regularly.",
-        "History": "📅 Study timelines and key events.",
-        "ICT": "💻 Practice practical and computer skills."
+        "Maths": "📘 Practice maths problems daily.",
+        "Science": "🔬 Use diagrams and experiments.",
+        "English": "📖 Improve reading and writing.",
+        "Sinhala": "✍️ Practice grammar.",
+        "History": "📅 Study timelines.",
+        "ICT": "💻 Practice computer skills."
     }
 
-    st.info(f"📚 Smart Suggestion for {weak}: {resources.get(weak)}")
+    st.info(f"📚 Suggestion for {weak}: {resources.get(weak)}")
 
     # 📊 Chart
     df = pd.DataFrame({
@@ -143,6 +154,7 @@ Name: {name}
 Average: {avg}
 Grade: {grade}
 Performance: {performance}
+Rank: {rank}
 Class Average: {class_avg}
 Weak Subject: {weak}
 Strong Subject: {strong}
