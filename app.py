@@ -65,3 +65,34 @@ if st.button("Analyze Performance"):
     })
 
     st.bar_chart(df_chart.set_index("Subjects"))
+    st.subheader("Progress")
+st.progress(int(avg))
+if performance == "Excellent":
+    st.success("Excellent Work! 🎉")
+elif performance == "Good":
+    st.info("Good Job 👍")
+else:
+    st.warning("Need Improvement ⚠️")
+    import pandas as pd
+
+df_chart = pd.DataFrame({
+    "Subjects": subjects,
+    "Marks": marks
+})
+
+st.bar_chart(df_chart.set_index("Subjects"))
+if avg < 50:
+    advice = "You should study more and focus on basics."
+elif avg < 65:
+    advice = "Practice past papers and improve weak areas."
+else:
+    advice = "Keep up the good work!"
+    result_text = f"""
+Average: {avg}
+Performance: {performance}
+Weak Subject: {weak}
+Strong Subject: {strong}
+Advice: {advice}
+"""
+
+st.download_button("📥 Download Report", result_text)
