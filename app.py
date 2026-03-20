@@ -28,8 +28,8 @@ st.markdown("<h1 style='text-align: center; color: #4CAF50;'>🎓 AI Student Per
 st.sidebar.header("📊 Student Info")
 name = st.sidebar.text_input("Enter Student Name")
 
-st.sidebar.markdown("---")
-st.sidebar.info("Fill marks and click Analyze")
+# 📚 Study Hours
+study_hours = st.slider("📚 Daily Study Hours", 0, 10, 2)
 
 # 📥 INPUTS
 st.write("### Enter your marks")
@@ -53,22 +53,21 @@ if st.button("🚀 Analyze Performance"):
     subjects = ["Maths","Science","English","Sinhala","History","ICT"]
 
     avg = sum(marks) / len(marks)
-    # 🎯 Grade Prediction
-if avg >= 75:
-    grade = "A"
-elif avg >= 65:
-    grade = "B"
-elif avg >= 55:
-    grade = "C"
-elif avg >= 40:
-    grade = "S"
-else:
-    grade = "F"
-
-st.write(f"🎯 Predicted Grade: {grade}")
 
     weak = subjects[marks.index(min(marks))]
     strong = subjects[marks.index(max(marks))]
+
+    # 🎯 Grade Prediction
+    if avg >= 75:
+        grade = "A"
+    elif avg >= 65:
+        grade = "B"
+    elif avg >= 55:
+        grade = "C"
+    elif avg >= 40:
+        grade = "S"
+    else:
+        grade = "F"
 
     # 🎯 Performance
     if avg >= 80:
@@ -80,19 +79,12 @@ st.write(f"🎯 Predicted Grade: {grade}")
     else:
         performance = "Needs Improvement"
 
-    # 🧠 Advice
-    if avg < 50:
-        advice = "Study more and focus on basics."
-    elif avg < 65:
-        advice = "Practice past papers."
-    else:
-        advice = "Keep up the good work!"
-
-    # 📊 RESULTS
+    # 📊 Results
     st.markdown(f"""
     ## 📊 Results for {name if name else "Student"}
 
     - **Average Score:** {round(avg,2)}
+    - **Grade:** {grade}
     - **Performance:** {performance}
     - **Weak Subject:** 🔴 {weak}
     - **Strong Subject:** 🟢 {strong}
@@ -101,39 +93,34 @@ st.write(f"🎯 Predicted Grade: {grade}")
     # 📈 Progress
     st.progress(int(avg))
 
-    # 🎨 Message
-    if performance == "Excellent":
-        st.success("🌟 Excellent Work!")
-    elif performance == "Good":
-        st.info("👍 Good Job!")
+    # 📚 Study Advice
+    if study_hours < 2:
+        st.warning("Increase study time!")
+    elif study_hours < 4:
+        st.info("Good, but can improve.")
     else:
-        st.warning("⚠️ Need Improvement")
+        st.success("Great study habit!")
 
-    # 📊 Bar Chart
+    # 📊 Chart
     df = pd.DataFrame({
         "Subjects": subjects,
         "Marks": marks
     })
-    st.markdown("### 📈 Bar Chart")
     st.bar_chart(df.set_index("Subjects"))
 
     # 🥧 Pie Chart
-    st.markdown("### 🥧 Subject Distribution")
     fig, ax = plt.subplots()
     ax.pie(marks, labels=subjects, autopct='%1.1f%%')
     st.pyplot(fig)
-
-    # 💡 Advice
-    st.success(f"📌 Advice: {advice}")
 
     # 📥 Download
     result_text = f"""
 Name: {name}
 Average: {avg}
+Grade: {grade}
 Performance: {performance}
 Weak Subject: {weak}
 Strong Subject: {strong}
-Advice: {advice}
 """
     st.download_button("📥 Download Report", result_text)
 
