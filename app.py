@@ -79,7 +79,7 @@ if st.button("🚀 Analyze Performance"):
     else:
         performance = "Needs Improvement"
 
-    # 📊 Class Average (NEW 🔥)
+    # 📊 Class Average
     class_avg = 60
 
     # 📊 Results
@@ -94,7 +94,7 @@ if st.button("🚀 Analyze Performance"):
     - **Class Average:** {class_avg}
     """)
 
-    # 📈 Comparison (NEW 🔥)
+    # 📈 Comparison
     if avg > class_avg:
         st.success("🎉 You are ABOVE class average!")
     elif avg == class_avg:
@@ -112,6 +112,18 @@ if st.button("🚀 Analyze Performance"):
         st.info("Good, but can improve.")
     else:
         st.success("Great study habit!")
+
+    # 🔥 NEW FEATURE — Weak Subject Smart Suggestions
+    resources = {
+        "Maths": "📘 Practice maths problems daily and focus on weak areas.",
+        "Science": "🔬 Revise concepts using diagrams and experiments.",
+        "English": "📖 Improve reading, writing and vocabulary skills.",
+        "Sinhala": "✍️ Practice grammar and essay writing regularly.",
+        "History": "📅 Study timelines and key events.",
+        "ICT": "💻 Practice practical and computer skills."
+    }
+
+    st.info(f"📚 Smart Suggestion for {weak}: {resources.get(weak)}")
 
     # 📊 Chart
     df = pd.DataFrame({
