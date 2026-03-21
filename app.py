@@ -103,6 +103,24 @@ if st.button("🚀 Analyze Performance"):
     else:
         st.warning("Keep working to reach your goal!")
 
+    # ⚠️ SMART ALERT SYSTEM
+    st.subheader("⚠️ Performance Alert System")
+
+    if avg < 40:
+        st.error("🚨 High Risk Student! Immediate attention required!")
+        st.write("👉 Focus on basics and get help from teachers.")
+
+    elif avg < 55:
+        st.warning("⚠️ Warning: Performance is below average.")
+        st.write("👉 Practice more and improve weak subjects.")
+
+    elif avg >= 75:
+        st.success("🎉 Excellent Performance! Keep it up!")
+        st.write("👉 You are doing great, maintain your level.")
+
+    else:
+        st.info("👍 Good performance, but can improve further.")
+
     # 📈 Progress bar
     st.progress(int(avg))
 
@@ -141,6 +159,22 @@ if st.session_state.students:
     # 🏆 Top performer
     top = df_all.loc[df_all["Average"].idxmax()]
     st.success(f"🏆 Top Performer: {top['Name']} ({round(top['Average'],2)})")
+
+    # 📥 Download CSV
+    csv = df_all.to_csv(index=False).encode('utf-8')
+    st.download_button("📥 Download Data", csv, "students.csv", "text/csv")
+
+# 📊 DATASET DASHBOARD
+st.markdown("## 📊 Dataset Analysis")
+
+file = st.file_uploader("Upload CSV", type=["csv"])
+
+if file:
+    df = pd.read_csv(file)
+    st.dataframe(df.head())
+
+    if "Average" in df.columns:
+        st.bar_chart(df["Average"])
 
 # 🧾 FOOTER
 st.markdown("---")
