@@ -7,10 +7,6 @@ st.set_page_config(page_title="Student Performance Analyzer", layout="wide")
 # 🎨 STYLE
 st.markdown("""
     <style>
-    body {
-        background-color: #0E1117;
-        color: white;
-    }
     .stButton>button {
         background-color: #4CAF50;
         color: white;
@@ -24,13 +20,16 @@ st.markdown("""
 # 🎓 TITLE
 st.markdown("<h1 style='text-align: center; color: #4CAF50;'>🎓 AI Student Performance Analyzer</h1>", unsafe_allow_html=True)
 
-# 🧠 SESSION STATE (NEW 🔥)
+# 🧠 SESSION STATE
 if "students" not in st.session_state:
     st.session_state.students = []
 
 # 📌 SIDEBAR
 st.sidebar.header("📊 Student Info")
 name = st.sidebar.text_input("Enter Student Name")
+
+# 🎯 Goal Setting (NEW)
+goal = st.sidebar.number_input("🎯 Target Average", 0, 100, 75)
 
 # 📚 Study Hours
 study_hours = st.slider("📚 Daily Study Hours", 0, 10, 2)
@@ -83,25 +82,34 @@ if st.button("🚀 Analyze Performance"):
     else:
         rank = "⚠️ Needs Improvement"
 
-    # 📊 Save student (NEW 🔥)
-    student_data = {
+    # 🤖 AI Prediction (NEW)
+    predicted = avg + (study_hours * 2)
+
+    # 📊 Save student
+    st.session_state.students.append({
         "Name": name if name else "Unknown",
         "Average": avg,
         "Grade": grade,
         "Rank": rank
-    }
-    st.session_state.students.append(student_data)
+    })
 
     # 📊 Results
     st.markdown(f"""
     ## 📊 Results for {name if name else "Student"}
 
     - **Average:** {round(avg,2)}
+    - **Predicted Next Score:** {round(predicted,2)}
     - **Grade:** {grade}
     - **Rank:** {rank}
     - **Weak Subject:** 🔴 {weak}
     - **Strong Subject:** 🟢 {strong}
     """)
+
+    # 🎯 Goal Check (NEW)
+    if avg >= goal:
+        st.success("🎉 Goal Achieved!")
+    else:
+        st.warning("Keep working to reach your goal!")
 
     # 📈 Progress
     st.progress(int(avg))
@@ -118,20 +126,34 @@ if st.button("🚀 Analyze Performance"):
     ax.pie(marks, labels=subjects, autopct='%1.1f%%')
     st.pyplot(fig)
 
-# 📋 SHOW ALL STUDENTS (NEW 🔥)
+# 📋 Student Records
 if st.session_state.students:
     st.markdown("## 📋 Student Records")
-
     df_all = pd.DataFrame(st.session_state.students)
     st.dataframe(df_all)
 
-    # 🏆 Top Performer
-    top_student = df_all.loc[df_all["Average"].idxmax()]
-    st.success(f"🏆 Top Performer: {top_student['Name']} ({round(top_student['Average'],2)})")
+    # 🏆 Top performer
+    top = df_all.loc[df_all["Average"].idxmax()]
+    st.success(f"🏆 Top Performer: {top['Name']} ({round(top['Average'],2)})")
 
-    # 📥 Download all data
+    # 📥 Download
     csv = df_all.to_csv(index=False).encode('utf-8')
-    st.download_button("📥 Download All Data", csv, "students.csv", "text/csv")
+    st.download_button("📥 Download Data", csv, "students.csv", "text/csv")
+
+# 📊 DATASET DASHBOARD (NEW 🔥)
+st.markdown("## 📊 Dataset Analysis")
+
+uploaded_file = st.file_uploader("Upload CSV Dataset", type=["csv"])
+
+if uploaded_file:
+    df = pd.read_csv(uploaded_file)
+
+    st.write("### Preview")
+    st.dataframe(df.head())
+
+    if "Average" in df.columns:
+        st.write("### Average Distribution")
+        st.bar_chart(df["Average"])
 
 # 🧾 FOOTER
 st.markdown("---")
