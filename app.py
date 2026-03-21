@@ -1,7 +1,4 @@
-hart(df["Average"])
-
-# 🧾 FOOTER
-st.markdown("---")import streamlit as st
+import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 
@@ -41,7 +38,7 @@ with col2:
     ict = st.number_input("ICT", 0, 100)
 
 # 🔘 BUTTON
-if st.button("🚀 Analyze"):
+if st.button("🚀 Analyze Performance"):
 
     marks = [maths, science, english, sinhala, history, ict]
     subjects = ["Maths","Science","English","Sinhala","History","ICT"]
@@ -82,7 +79,7 @@ if st.button("🚀 Analyze"):
         "Grade": grade
     })
 
-    # 📈 SAVE PROGRESS (NEW 🔥)
+    # 📈 SAVE PROGRESS
     if name:
         if name not in st.session_state.progress:
             st.session_state.progress[name] = []
@@ -92,25 +89,28 @@ if st.button("🚀 Analyze"):
     st.markdown(f"""
     ## 📊 Results for {name if name else "Student"}
 
-    - Average: {round(avg,2)}
-    - Predicted: {round(predicted,2)}
-    - Grade: {grade}
-    - Rank: {rank}
-    - Weak: 🔴 {weak}
-    - Strong: 🟢 {strong}
+    - **Average:** {round(avg,2)}
+    - **Predicted Score:** {round(predicted,2)}
+    - **Grade:** {grade}
+    - **Rank:** {rank}
+    - **Weak Subject:** 🔴 {weak}
+    - **Strong Subject:** 🟢 {strong}
     """)
 
-    # 🎯 Goal
+    # 🎯 Goal Check
     if avg >= goal:
         st.success("🎉 Goal Achieved!")
     else:
-        st.warning("Keep working!")
+        st.warning("Keep working to reach your goal!")
 
     # 📈 Progress bar
     st.progress(int(avg))
 
     # 📊 Bar chart
-    df = pd.DataFrame({"Subjects": subjects, "Marks": marks})
+    df = pd.DataFrame({
+        "Subjects": subjects,
+        "Marks": marks
+    })
     st.bar_chart(df.set_index("Subjects"))
 
     # 🥧 Pie chart
@@ -118,7 +118,7 @@ if st.button("🚀 Analyze"):
     ax.pie(marks, labels=subjects, autopct='%1.1f%%')
     st.pyplot(fig)
 
-# 📈 PROGRESS TRACKER DISPLAY (NEW 🔥)
+# 📈 PROGRESS TRACKER
 st.markdown("## 📈 Student Progress Tracker")
 
 if name and name in st.session_state.progress:
@@ -134,12 +134,14 @@ if name and name in st.session_state.progress:
 # 📋 STUDENT RECORDS
 if st.session_state.students:
     st.markdown("## 📋 Student Records")
+
     df_all = pd.DataFrame(st.session_state.students)
     st.dataframe(df_all)
 
+    # 🏆 Top performer
     top = df_all.loc[df_all["Average"].idxmax()]
     st.success(f"🏆 Top Performer: {top['Name']} ({round(top['Average'],2)})")
 
 # 🧾 FOOTER
 st.markdown("---")
-st.markdown("🚀 Final AI Project | Dasun")
+st.markdown("🚀 Final AI Project | Developed by Dasun")
