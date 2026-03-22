@@ -2,10 +2,10 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 
-# 📱 Mobile Friendly Config
+# 📱 Mobile UI
 st.set_page_config(page_title="Student Analyzer", layout="centered")
 
-# 🔐 LOGIN SYSTEM
+# 🔐 LOGIN
 users = {"admin": "1234", "student": "pass"}
 
 if "logged_in" not in st.session_state:
@@ -31,7 +31,7 @@ if not st.session_state.logged_in:
 
     st.stop()
 
-# 🔓 LOGOUT
+# 🔓 Logout
 if st.button("Logout"):
     st.session_state.logged_in = False
     st.session_state.user = ""
@@ -47,8 +47,12 @@ if "students" not in st.session_state:
 if "progress" not in st.session_state:
     st.session_state.progress = {}
 
+# 🔥 NEW SUBJECT PROGRESS
+if "subject_progress" not in st.session_state:
+    st.session_state.subject_progress = {}
+
 # INPUT
-st.write("### 📱 Enter Your Marks")
+st.write("### Enter Marks")
 
 name = st.text_input("Student Name")
 study_hours = st.slider("Study Hours", 0, 10, 2)
@@ -71,18 +75,6 @@ if st.button("🚀 Analyze"):
     weak = subjects[marks.index(min(marks))]
     strong = subjects[marks.index(max(marks))]
 
-    # Grade
-    if avg >= 75:
-        grade = "A"
-    elif avg >= 65:
-        grade = "B"
-    elif avg >= 55:
-        grade = "C"
-    elif avg >= 40:
-        grade = "S"
-    else:
-        grade = "F"
-
     # 🎯 Exam Readiness
     readiness = (avg * 0.7) + (study_hours * 5)
     if avg < 50:
@@ -100,50 +92,77 @@ if st.button("🚀 Analyze"):
     else:
         badge = "📘 Beginner"
 
-    # SAVE
+    # SAVE GENERAL DATA
     st.session_state.students.append({
         "Name": name if name else "Unknown",
-        "Average": avg,
-        "Grade": grade
+        "Average": avg
     })
 
+    # 📈 SAVE TOTAL PROGRESS
     if name:
         if name not in st.session_state.progress:
             st.session_state.progress[name] = []
         st.session_state.progress[name].append(avg)
 
+    # 📊 SAVE SUBJECT PROGRESS
+    if name:
+        if name not in st.session_state.subject_progress:
+            st.session_state.subject_progress[name] = {
+                "Maths": [],
+                "Science": [],
+                "English": [],
+                "Sinhala": [],
+                "History": [],
+                "ICT": []
+            }
+
+        st.session_state.subject_progress[name]["Maths"].append(maths)
+        st.session_state.subject_progress[name]["Science"].append(science)
+        st.session_state.subject_progress[name]["English"].append(english)
+        st.session_state.subject_progress[name]["Sinhala"].append(sinhala)
+        st.session_state.subject_progress[name]["History"].append(history)
+        st.session_state.subject_progress[name]["ICT"].append(ict)
+
     # RESULTS
-    st.write("## 📊 Results")
+    st.write("## Results")
     st.write(f"Average: {round(avg,2)}")
-    st.write(f"Grade: {grade}")
     st.write(f"Weak: {weak}")
     st.write(f"Strong: {strong}")
 
     # 🎯 Readiness
-    st.subheader("🎯 Exam Readiness")
+    st.subheader("Exam Readiness")
     st.write(f"{round(readiness,2)}%")
     st.progress(int(readiness))
 
     # 🎮 Gamification
-    st.subheader("🎮 Gamification")
+    st.subheader("Gamification")
     st.write(f"Points: {points}")
     st.write(f"Badge: {badge}")
 
-    # 📚 Study Plan
-    st.subheader("📚 Study Plan")
-    st.write(f"Focus on: {weak}")
+    # 📚 Study Tip
+    st.subheader("Study Tip")
+    st.write(f"Focus more on {weak}")
 
-    # 📊 Chart
+    # Chart
     df = pd.DataFrame({"Subjects": subjects, "Marks": marks})
     st.bar_chart(df.set_index("Subjects"))
 
-# 📈 Progress Tracker
+# 📈 TOTAL PROGRESS
+st.markdown("## 📈 Overall Progress")
+
 if name and name in st.session_state.progress:
     st.line_chart(st.session_state.progress[name])
 
-# 🧑‍🏫 Admin Dashboard
+# 📊 SUBJECT PROGRESS (NEW 🔥)
+st.markdown("## 📊 Subject-wise Progress")
+
+if name and name in st.session_state.subject_progress:
+    df_sub = pd.DataFrame(st.session_state.subject_progress[name])
+    st.line_chart(df_sub)
+
+# 🧑‍🏫 ADMIN DASHBOARD
 if st.session_state.user == "admin":
-    st.write("## 🧑‍🏫 Admin Dashboard")
+    st.write("## Admin Dashboard")
 
     if st.session_state.students:
         df_all = pd.DataFrame(st.session_state.students)
@@ -157,18 +176,20 @@ if st.session_state.user == "admin":
         st.write("Weak Students:")
         st.dataframe(weak_students)
 
-# 🤖 AI Chatbot
+# 🤖 AI CHATBOT
 st.markdown("## 🤖 AI Assistant")
 
-q = st.text_input("Ask study question")
+q = st.text_input("Ask question")
 
 if q:
     if "math" in q.lower():
-        st.write("Practice daily maths problems.")
+        st.write("Practice maths daily.")
     elif "english" in q.lower():
-        st.write("Improve reading and vocabulary.")
+        st.write("Improve vocabulary.")
+    elif "science" in q.lower():
+        st.write("Revise with diagrams.")
     else:
-        st.write("Stay focused and study regularly.")
+        st.write("Study regularly and stay focused.")
 
 # FOOTER
 st.markdown("---")
