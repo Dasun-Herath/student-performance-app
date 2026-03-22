@@ -13,6 +13,9 @@ users = {
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 
+if "user" not in st.session_state:
+    st.session_state.user = ""
+
 if not st.session_state.logged_in:
     st.title("🔐 Login to Continue")
 
@@ -22,6 +25,7 @@ if not st.session_state.logged_in:
     if st.button("Login"):
         if username in users and users[username] == password:
             st.session_state.logged_in = True
+            st.session_state.user = username  # save user
             st.success("Login Successful ✅")
             st.rerun()
         else:
@@ -32,12 +36,13 @@ if not st.session_state.logged_in:
 # 🔓 LOGOUT
 if st.sidebar.button("Logout"):
     st.session_state.logged_in = False
+    st.session_state.user = ""
     st.rerun()
 
 # 🎓 TITLE
 st.markdown("<h1 style='text-align: center; color: #4CAF50;'>🎓 AI Student Performance Analyzer</h1>", unsafe_allow_html=True)
 
-# 🧠 SESSION
+# 🧠 SESSION STORAGE
 if "students" not in st.session_state:
     st.session_state.students = []
 
@@ -66,7 +71,7 @@ with col2:
     history = st.number_input("History", 0, 100)
     ict = st.number_input("ICT", 0, 100)
 
-# 🔘 BUTTON
+# 🚀 ANALYZE
 if st.button("🚀 Analyze Performance"):
 
     marks = [maths, science, english, sinhala, history, ict]
@@ -76,7 +81,7 @@ if st.button("🚀 Analyze Performance"):
     weak = subjects[marks.index(min(marks))]
     strong = subjects[marks.index(max(marks))]
 
-    # 🎯 Grade
+    # Grade
     if avg >= 75:
         grade = "A"
     elif avg >= 65:
@@ -88,7 +93,7 @@ if st.button("🚀 Analyze Performance"):
     else:
         grade = "F"
 
-    # 🏆 Rank
+    # Rank
     if avg >= 85:
         rank = "🥇 Top Performer"
     elif avg >= 70:
@@ -100,7 +105,7 @@ if st.button("🚀 Analyze Performance"):
 
     predicted = avg + (study_hours * 2)
 
-    # SAVE
+    # SAVE DATA
     st.session_state.students.append({
         "Name": name if name else "Unknown",
         "Average": avg,
@@ -159,7 +164,7 @@ if st.button("🚀 Analyze Performance"):
         st.write(study_plan[weak]["plan"])
         st.markdown(f"[🎥 Watch Videos]({study_plan[weak]['link']})")
 
-    # 📊 CHARTS
+    # CHARTS
     st.progress(int(avg))
 
     df = pd.DataFrame({"Subjects": subjects, "Marks": marks})
@@ -182,17 +187,44 @@ if name and name in st.session_state.progress:
 
     st.line_chart(dfp.set_index("Attempt"))
 
-# 📋 RECORDS
+# 📋 STUDENT RECORDS
 if st.session_state.students:
     st.markdown("## 📋 Student Records")
+
     df_all = pd.DataFrame(st.session_state.students)
     st.dataframe(df_all)
 
-    top = df_all.loc[df_all["Average"].idxmax()]
-    st.success(f"🏆 Top Performer: {top['Name']} ({round(top['Average'],2)})")
+# 🧑‍🏫 ADMIN DASHBOARD
+if st.session_state.user == "admin":
 
-    csv = df_all.to_csv(index=False).encode('utf-8')
-    st.download_button("📥 Download Data", csv, "students.csv", "text/csv")
+    st.markdown("## 🧑‍🏫 Admin Dashboard")
+
+    if st.session_state.students:
+        df_all = pd.DataFrame(st.session_state.students)
+
+        # Class average
+        class_avg = df_all["Average"].mean()
+        st.info(f"📊 Class Average: {round(class_avg,2)}")
+
+        # Top performer
+        top = df_all.loc[df_all["Average"].idxmax()]
+        st.success(f"🏆 Top Performer: {top['Name']} ({round(top['Average'],2)})")
+
+        # Weak students
+        weak_students = df_all[df_all["Average"] < 50]
+
+        st.markdown("### ⚠️ At Risk Students")
+        if not weak_students.empty:
+            st.dataframe(weak_students)
+        else:
+            st.success("No weak students 🎉")
+
+        # Distribution
+        st.markdown("### 📈 Class Performance")
+        st.bar_chart(df_all["Average"])
+
+    else:
+        st.warning("No student data available")
 
 # 📊 DATASET
 st.markdown("## 📊 Dataset Analysis")
