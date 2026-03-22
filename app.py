@@ -4,23 +4,54 @@ import matplotlib.pyplot as plt
 
 st.set_page_config(page_title="Student Performance Analyzer", layout="wide")
 
+# 🔐 LOGIN SYSTEM
+users = {
+    "admin": "1234",
+    "student": "pass"
+}
+
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
+
+if not st.session_state.logged_in:
+    st.title("🔐 Login to Continue")
+
+    username = st.text_input("Username")
+    password = st.text_input("Password", type="password")
+
+    if st.button("Login"):
+        if username in users and users[username] == password:
+            st.session_state.logged_in = True
+            st.success("Login Successful ✅")
+            st.rerun()
+        else:
+            st.error("Invalid Username or Password ❌")
+
+    st.stop()
+
+# 🔓 LOGOUT
+if st.sidebar.button("Logout"):
+    st.session_state.logged_in = False
+    st.rerun()
+
+# 🎓 TITLE
 st.markdown("<h1 style='text-align: center; color: #4CAF50;'>🎓 AI Student Performance Analyzer</h1>", unsafe_allow_html=True)
 
-# SESSION
+# 🧠 SESSION
 if "students" not in st.session_state:
     st.session_state.students = []
 
 if "progress" not in st.session_state:
     st.session_state.progress = {}
 
-# SIDEBAR
+# 📌 SIDEBAR
 st.sidebar.header("📊 Student Info")
 name = st.sidebar.text_input("Student Name")
 goal = st.sidebar.number_input("🎯 Target Average", 0, 100, 75)
 
 study_hours = st.slider("📚 Study Hours", 0, 10, 2)
 
-# INPUT
+# 📥 INPUT
 st.write("### Enter Marks")
 
 col1, col2 = st.columns(2)
@@ -35,7 +66,7 @@ with col2:
     history = st.number_input("History", 0, 100)
     ict = st.number_input("ICT", 0, 100)
 
-# BUTTON
+# 🔘 BUTTON
 if st.button("🚀 Analyze Performance"):
 
     marks = [maths, science, english, sinhala, history, ict]
@@ -45,7 +76,7 @@ if st.button("🚀 Analyze Performance"):
     weak = subjects[marks.index(min(marks))]
     strong = subjects[marks.index(max(marks))]
 
-    # Grade
+    # 🎯 Grade
     if avg >= 75:
         grade = "A"
     elif avg >= 65:
@@ -57,7 +88,7 @@ if st.button("🚀 Analyze Performance"):
     else:
         grade = "F"
 
-    # Rank
+    # 🏆 Rank
     if avg >= 85:
         rank = "🥇 Top Performer"
     elif avg >= 70:
@@ -85,15 +116,15 @@ if st.button("🚀 Analyze Performance"):
     st.markdown(f"""
     ## 📊 Results for {name if name else "Student"}
 
-    - Average: {round(avg,2)}
-    - Predicted: {round(predicted,2)}
-    - Grade: {grade}
-    - Rank: {rank}
-    - Weak Subject: 🔴 {weak}
-    - Strong Subject: 🟢 {strong}
+    - **Average:** {round(avg,2)}
+    - **Predicted Score:** {round(predicted,2)}
+    - **Grade:** {grade}
+    - **Rank:** {rank}
+    - **Weak Subject:** 🔴 {weak}
+    - **Strong Subject:** 🟢 {strong}
     """)
 
-    # Goal
+    # GOAL
     if avg >= goal:
         st.success("🎉 Goal Achieved!")
     else:
@@ -111,44 +142,24 @@ if st.button("🚀 Analyze Performance"):
     else:
         st.info("👍 Good")
 
-    # 📚 STUDY PLAN (NEW 🔥)
+    # 📚 STUDY PLAN
     st.subheader("📚 Personalized Study Plan")
 
     study_plan = {
-        "Maths": {
-            "plan": "Day 1: Algebra\nDay 2: Geometry\nDay 3: Past Papers",
-            "link": "https://www.youtube.com/results?search_query=maths+basics"
-        },
-        "Science": {
-            "plan": "Day 1: Theory\nDay 2: Diagrams\nDay 3: Revision",
-            "link": "https://www.youtube.com/results?search_query=science+lessons"
-        },
-        "English": {
-            "plan": "Day 1: Reading\nDay 2: Writing\nDay 3: Grammar",
-            "link": "https://www.youtube.com/results?search_query=english+grammar"
-        },
-        "Sinhala": {
-            "plan": "Day 1: Grammar\nDay 2: Essays\nDay 3: Reading",
-            "link": "https://www.youtube.com/results?search_query=sinhala+lessons"
-        },
-        "History": {
-            "plan": "Day 1: Events\nDay 2: Dates\nDay 3: Revision",
-            "link": "https://www.youtube.com/results?search_query=history+lessons"
-        },
-        "ICT": {
-            "plan": "Day 1: Theory\nDay 2: Practical\nDay 3: Revision",
-            "link": "https://www.youtube.com/results?search_query=ict+lessons"
-        }
+        "Maths": {"plan": "Algebra → Geometry → Past Papers", "link": "https://www.youtube.com/results?search_query=maths+lessons"},
+        "Science": {"plan": "Theory → Diagrams → Revision", "link": "https://www.youtube.com/results?search_query=science+lessons"},
+        "English": {"plan": "Reading → Writing → Grammar", "link": "https://www.youtube.com/results?search_query=english+grammar"},
+        "Sinhala": {"plan": "Grammar → Essays → Reading", "link": "https://www.youtube.com/results?search_query=sinhala+lessons"},
+        "History": {"plan": "Events → Dates → Revision", "link": "https://www.youtube.com/results?search_query=history+lessons"},
+        "ICT": {"plan": "Theory → Practical → Revision", "link": "https://www.youtube.com/results?search_query=ict+lessons"}
     }
 
-    plan = study_plan.get(weak)
+    if weak in study_plan:
+        st.write(f"🔴 Focus: {weak}")
+        st.write(study_plan[weak]["plan"])
+        st.markdown(f"[🎥 Watch Videos]({study_plan[weak]['link']})")
 
-    if plan:
-        st.write(f"### 🔴 Focus on: {weak}")
-        st.write(plan["plan"])
-        st.markdown(f"[🎥 Watch Lessons]({plan['link']})")
-
-    # Charts
+    # 📊 CHARTS
     st.progress(int(avg))
 
     df = pd.DataFrame({"Subjects": subjects, "Marks": marks})
@@ -158,7 +169,7 @@ if st.button("🚀 Analyze Performance"):
     ax.pie(marks, labels=subjects, autopct='%1.1f%%')
     st.pyplot(fig)
 
-# PROGRESS TRACKER
+# 📈 PROGRESS TRACKER
 st.markdown("## 📈 Student Progress Tracker")
 
 if name and name in st.session_state.progress:
@@ -171,12 +182,30 @@ if name and name in st.session_state.progress:
 
     st.line_chart(dfp.set_index("Attempt"))
 
-# RECORDS
+# 📋 RECORDS
 if st.session_state.students:
     st.markdown("## 📋 Student Records")
     df_all = pd.DataFrame(st.session_state.students)
     st.dataframe(df_all)
 
+    top = df_all.loc[df_all["Average"].idxmax()]
+    st.success(f"🏆 Top Performer: {top['Name']} ({round(top['Average'],2)})")
+
+    csv = df_all.to_csv(index=False).encode('utf-8')
+    st.download_button("📥 Download Data", csv, "students.csv", "text/csv")
+
+# 📊 DATASET
+st.markdown("## 📊 Dataset Analysis")
+
+file = st.file_uploader("Upload CSV", type=["csv"])
+
+if file:
+    df = pd.read_csv(file)
+    st.dataframe(df.head())
+
+    if "Average" in df.columns:
+        st.bar_chart(df["Average"])
+
 # FOOTER
 st.markdown("---")
-st.markdown("🚀 Final AI Project | Dasun")
+st.markdown("🚀 Final AI Project | Developed by Dasun")
