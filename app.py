@@ -2,13 +2,11 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 
-st.set_page_config(page_title="Student Performance Analyzer", layout="wide")
+# 📱 Mobile Friendly Config
+st.set_page_config(page_title="Student Analyzer", layout="centered")
 
 # 🔐 LOGIN SYSTEM
-users = {
-    "admin": "1234",
-    "student": "pass"
-}
+users = {"admin": "1234", "student": "pass"}
 
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
@@ -17,7 +15,7 @@ if "user" not in st.session_state:
     st.session_state.user = ""
 
 if not st.session_state.logged_in:
-    st.title("🔐 Login to Continue")
+    st.title("🔐 Login")
 
     username = st.text_input("Username")
     password = st.text_input("Password", type="password")
@@ -26,58 +24,50 @@ if not st.session_state.logged_in:
         if username in users and users[username] == password:
             st.session_state.logged_in = True
             st.session_state.user = username
-            st.success("Login Successful ✅")
+            st.success("Login Success ✅")
             st.rerun()
         else:
-            st.error("Invalid Username or Password ❌")
+            st.error("Invalid Login ❌")
 
     st.stop()
 
 # 🔓 LOGOUT
-if st.sidebar.button("Logout"):
+if st.button("Logout"):
     st.session_state.logged_in = False
     st.session_state.user = ""
     st.rerun()
 
 # 🎓 TITLE
-st.markdown("<h1 style='text-align: center; color: #4CAF50;'>🎓 AI Student Performance Analyzer</h1>", unsafe_allow_html=True)
+st.markdown("<h2 style='text-align: center;'>📱 Student Performance App</h2>", unsafe_allow_html=True)
 
-# SESSION
+# SESSION STORAGE
 if "students" not in st.session_state:
     st.session_state.students = []
 
 if "progress" not in st.session_state:
     st.session_state.progress = {}
 
-# SIDEBAR
-st.sidebar.header("📊 Student Info")
-name = st.sidebar.text_input("Student Name")
-goal = st.sidebar.number_input("🎯 Target Average", 0, 100, 75)
-
-study_hours = st.slider("📚 Study Hours", 0, 10, 2)
-
 # INPUT
-st.write("### Enter Marks")
+st.write("### 📱 Enter Your Marks")
 
-col1, col2 = st.columns(2)
+name = st.text_input("Student Name")
+study_hours = st.slider("Study Hours", 0, 10, 2)
+goal = st.number_input("Target Average", 0, 100, 75)
 
-with col1:
-    maths = st.number_input("Maths", 0, 100)
-    science = st.number_input("Science", 0, 100)
-    english = st.number_input("English", 0, 100)
-
-with col2:
-    sinhala = st.number_input("Sinhala", 0, 100)
-    history = st.number_input("History", 0, 100)
-    ict = st.number_input("ICT", 0, 100)
+maths = st.number_input("Maths", 0, 100)
+science = st.number_input("Science", 0, 100)
+english = st.number_input("English", 0, 100)
+sinhala = st.number_input("Sinhala", 0, 100)
+history = st.number_input("History", 0, 100)
+ict = st.number_input("ICT", 0, 100)
 
 # ANALYZE
-if st.button("🚀 Analyze Performance"):
+if st.button("🚀 Analyze"):
 
     marks = [maths, science, english, sinhala, history, ict]
     subjects = ["Maths","Science","English","Sinhala","History","ICT"]
 
-    avg = sum(marks) / len(marks)
+    avg = sum(marks)/len(marks)
     weak = subjects[marks.index(min(marks))]
     strong = subjects[marks.index(max(marks))]
 
@@ -93,32 +83,22 @@ if st.button("🚀 Analyze Performance"):
     else:
         grade = "F"
 
-    # Rank
-    if avg >= 85:
-        rank = "🥇 Top Performer"
-    elif avg >= 70:
-        rank = "🥈 Good Performer"
-    elif avg >= 55:
-        rank = "🥉 Average Performer"
-    else:
-        rank = "⚠️ Needs Improvement"
-
-    predicted = avg + (study_hours * 2)
-
-    # 🎯 EXAM READINESS
+    # 🎯 Exam Readiness
     readiness = (avg * 0.7) + (study_hours * 5)
-
     if avg < 50:
         readiness -= 10
-
     readiness = max(0, min(100, readiness))
 
-    if readiness >= 80:
-        readiness_status = "✅ Ready for Exams"
-    elif readiness >= 60:
-        readiness_status = "⚠️ Almost Ready"
+    # 🎮 Gamification
+    points = int(avg)
+    if avg >= 85:
+        badge = "🏆 Gold"
+    elif avg >= 70:
+        badge = "🥈 Silver"
+    elif avg >= 55:
+        badge = "🥉 Bronze"
     else:
-        readiness_status = "❌ Not Ready"
+        badge = "📘 Beginner"
 
     # SAVE
     st.session_state.students.append({
@@ -133,125 +113,63 @@ if st.button("🚀 Analyze Performance"):
         st.session_state.progress[name].append(avg)
 
     # RESULTS
-    st.markdown(f"""
-    ## 📊 Results for {name if name else "Student"}
+    st.write("## 📊 Results")
+    st.write(f"Average: {round(avg,2)}")
+    st.write(f"Grade: {grade}")
+    st.write(f"Weak: {weak}")
+    st.write(f"Strong: {strong}")
 
-    - **Average:** {round(avg,2)}
-    - **Predicted Score:** {round(predicted,2)}
-    - **Grade:** {grade}
-    - **Rank:** {rank}
-    - **Weak Subject:** 🔴 {weak}
-    - **Strong Subject:** 🟢 {strong}
-    """)
-
-    # 🎯 READINESS DISPLAY
-    st.subheader("🎯 Exam Readiness Score")
-    st.write(f"**Score:** {round(readiness,2)}%")
-    st.write(f"**Status:** {readiness_status}")
+    # 🎯 Readiness
+    st.subheader("🎯 Exam Readiness")
+    st.write(f"{round(readiness,2)}%")
     st.progress(int(readiness))
 
-    # GOAL
-    if avg >= goal:
-        st.success("🎉 Goal Achieved!")
-    else:
-        st.warning("Keep working!")
+    # 🎮 Gamification
+    st.subheader("🎮 Gamification")
+    st.write(f"Points: {points}")
+    st.write(f"Badge: {badge}")
 
-    # ALERT
-    st.subheader("⚠️ Performance Alert System")
+    # 📚 Study Plan
+    st.subheader("📚 Study Plan")
+    st.write(f"Focus on: {weak}")
 
-    if avg < 40:
-        st.error("🚨 High Risk Student!")
-    elif avg < 55:
-        st.warning("⚠️ Below Average")
-    elif avg >= 75:
-        st.success("🎉 Excellent!")
-    else:
-        st.info("👍 Good")
-
-    # STUDY PLAN
-    st.subheader("📚 Personalized Study Plan")
-
-    study_plan = {
-        "Maths": {"plan": "Algebra → Geometry → Past Papers", "link": "https://www.youtube.com/results?search_query=maths+lessons"},
-        "Science": {"plan": "Theory → Diagrams → Revision", "link": "https://www.youtube.com/results?search_query=science+lessons"},
-        "English": {"plan": "Reading → Writing → Grammar", "link": "https://www.youtube.com/results?search_query=english+grammar"},
-        "Sinhala": {"plan": "Grammar → Essays → Reading", "link": "https://www.youtube.com/results?search_query=sinhala+lessons"},
-        "History": {"plan": "Events → Dates → Revision", "link": "https://www.youtube.com/results?search_query=history+lessons"},
-        "ICT": {"plan": "Theory → Practical → Revision", "link": "https://www.youtube.com/results?search_query=ict+lessons"}
-    }
-
-    if weak in study_plan:
-        st.write(f"🔴 Focus: {weak}")
-        st.write(study_plan[weak]["plan"])
-        st.markdown(f"[🎥 Watch Videos]({study_plan[weak]['link']})")
-
-    # CHARTS
+    # 📊 Chart
     df = pd.DataFrame({"Subjects": subjects, "Marks": marks})
     st.bar_chart(df.set_index("Subjects"))
 
-    fig, ax = plt.subplots()
-    ax.pie(marks, labels=subjects, autopct='%1.1f%%')
-    st.pyplot(fig)
-
-# PROGRESS TRACKER
-st.markdown("## 📈 Student Progress Tracker")
-
+# 📈 Progress Tracker
 if name and name in st.session_state.progress:
-    data = st.session_state.progress[name]
+    st.line_chart(st.session_state.progress[name])
 
-    dfp = pd.DataFrame({
-        "Attempt": list(range(1, len(data)+1)),
-        "Average": data
-    })
-
-    st.line_chart(dfp.set_index("Attempt"))
-
-# STUDENT RECORDS
-if st.session_state.students:
-    st.markdown("## 📋 Student Records")
-    df_all = pd.DataFrame(st.session_state.students)
-    st.dataframe(df_all)
-
-# ADMIN DASHBOARD
+# 🧑‍🏫 Admin Dashboard
 if st.session_state.user == "admin":
-
-    st.markdown("## 🧑‍🏫 Admin Dashboard")
+    st.write("## 🧑‍🏫 Admin Dashboard")
 
     if st.session_state.students:
         df_all = pd.DataFrame(st.session_state.students)
 
-        class_avg = df_all["Average"].mean()
-        st.info(f"📊 Class Average: {round(class_avg,2)}")
+        st.write("Class Average:", round(df_all["Average"].mean(),2))
 
         top = df_all.loc[df_all["Average"].idxmax()]
-        st.success(f"🏆 Top Performer: {top['Name']} ({round(top['Average'],2)})")
+        st.write("Top Performer:", top["Name"])
 
         weak_students = df_all[df_all["Average"] < 50]
+        st.write("Weak Students:")
+        st.dataframe(weak_students)
 
-        st.markdown("### ⚠️ At Risk Students")
-        if not weak_students.empty:
-            st.dataframe(weak_students)
-        else:
-            st.success("No weak students 🎉")
+# 🤖 AI Chatbot
+st.markdown("## 🤖 AI Assistant")
 
-        st.markdown("### 📈 Class Performance")
-        st.bar_chart(df_all["Average"])
+q = st.text_input("Ask study question")
 
+if q:
+    if "math" in q.lower():
+        st.write("Practice daily maths problems.")
+    elif "english" in q.lower():
+        st.write("Improve reading and vocabulary.")
     else:
-        st.warning("No student data available")
-
-# DATASET
-st.markdown("## 📊 Dataset Analysis")
-
-file = st.file_uploader("Upload CSV", type=["csv"])
-
-if file:
-    df = pd.read_csv(file)
-    st.dataframe(df.head())
-
-    if "Average" in df.columns:
-        st.bar_chart(df["Average"])
+        st.write("Stay focused and study regularly.")
 
 # FOOTER
 st.markdown("---")
-st.markdown("🚀 Final AI Project | Developed by Dasun")
+st.write("🚀 Developed by Dasun")
