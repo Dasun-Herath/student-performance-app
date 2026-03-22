@@ -4,25 +4,23 @@ import matplotlib.pyplot as plt
 
 st.set_page_config(page_title="Student Performance Analyzer", layout="wide")
 
-# 🎓 TITLE
 st.markdown("<h1 style='text-align: center; color: #4CAF50;'>🎓 AI Student Performance Analyzer</h1>", unsafe_allow_html=True)
 
-# 🧠 SESSION STATE
+# SESSION
 if "students" not in st.session_state:
     st.session_state.students = []
 
 if "progress" not in st.session_state:
     st.session_state.progress = {}
 
-# 📌 SIDEBAR
+# SIDEBAR
 st.sidebar.header("📊 Student Info")
 name = st.sidebar.text_input("Student Name")
 goal = st.sidebar.number_input("🎯 Target Average", 0, 100, 75)
 
-# 📚 Study Hours
 study_hours = st.slider("📚 Study Hours", 0, 10, 2)
 
-# 📥 INPUT
+# INPUT
 st.write("### Enter Marks")
 
 col1, col2 = st.columns(2)
@@ -37,7 +35,7 @@ with col2:
     history = st.number_input("History", 0, 100)
     ict = st.number_input("ICT", 0, 100)
 
-# 🔘 BUTTON
+# BUTTON
 if st.button("🚀 Analyze Performance"):
 
     marks = [maths, science, english, sinhala, history, ict]
@@ -47,7 +45,7 @@ if st.button("🚀 Analyze Performance"):
     weak = subjects[marks.index(min(marks))]
     strong = subjects[marks.index(max(marks))]
 
-    # 🎯 Grade
+    # Grade
     if avg >= 75:
         grade = "A"
     elif avg >= 65:
@@ -59,7 +57,7 @@ if st.button("🚀 Analyze Performance"):
     else:
         grade = "F"
 
-    # 🏆 Rank
+    # Rank
     if avg >= 85:
         rank = "🥇 Top Performer"
     elif avg >= 70:
@@ -69,113 +67,116 @@ if st.button("🚀 Analyze Performance"):
     else:
         rank = "⚠️ Needs Improvement"
 
-    # 🤖 Prediction
     predicted = avg + (study_hours * 2)
 
-    # 📊 SAVE STUDENT
+    # SAVE
     st.session_state.students.append({
         "Name": name if name else "Unknown",
         "Average": avg,
         "Grade": grade
     })
 
-    # 📈 SAVE PROGRESS
     if name:
         if name not in st.session_state.progress:
             st.session_state.progress[name] = []
         st.session_state.progress[name].append(avg)
 
-    # 📊 RESULTS
+    # RESULTS
     st.markdown(f"""
     ## 📊 Results for {name if name else "Student"}
 
-    - **Average:** {round(avg,2)}
-    - **Predicted Score:** {round(predicted,2)}
-    - **Grade:** {grade}
-    - **Rank:** {rank}
-    - **Weak Subject:** 🔴 {weak}
-    - **Strong Subject:** 🟢 {strong}
+    - Average: {round(avg,2)}
+    - Predicted: {round(predicted,2)}
+    - Grade: {grade}
+    - Rank: {rank}
+    - Weak Subject: 🔴 {weak}
+    - Strong Subject: 🟢 {strong}
     """)
 
-    # 🎯 Goal Check
+    # Goal
     if avg >= goal:
         st.success("🎉 Goal Achieved!")
     else:
-        st.warning("Keep working to reach your goal!")
+        st.warning("Keep working!")
 
-    # ⚠️ SMART ALERT SYSTEM
+    # ALERT
     st.subheader("⚠️ Performance Alert System")
 
     if avg < 40:
-        st.error("🚨 High Risk Student! Immediate attention required!")
-        st.write("👉 Focus on basics and get help from teachers.")
-
+        st.error("🚨 High Risk Student!")
     elif avg < 55:
-        st.warning("⚠️ Warning: Performance is below average.")
-        st.write("👉 Practice more and improve weak subjects.")
-
+        st.warning("⚠️ Below Average")
     elif avg >= 75:
-        st.success("🎉 Excellent Performance! Keep it up!")
-        st.write("👉 You are doing great, maintain your level.")
-
+        st.success("🎉 Excellent!")
     else:
-        st.info("👍 Good performance, but can improve further.")
+        st.info("👍 Good")
 
-    # 📈 Progress bar
+    # 📚 STUDY PLAN (NEW 🔥)
+    st.subheader("📚 Personalized Study Plan")
+
+    study_plan = {
+        "Maths": {
+            "plan": "Day 1: Algebra\nDay 2: Geometry\nDay 3: Past Papers",
+            "link": "https://www.youtube.com/results?search_query=maths+basics"
+        },
+        "Science": {
+            "plan": "Day 1: Theory\nDay 2: Diagrams\nDay 3: Revision",
+            "link": "https://www.youtube.com/results?search_query=science+lessons"
+        },
+        "English": {
+            "plan": "Day 1: Reading\nDay 2: Writing\nDay 3: Grammar",
+            "link": "https://www.youtube.com/results?search_query=english+grammar"
+        },
+        "Sinhala": {
+            "plan": "Day 1: Grammar\nDay 2: Essays\nDay 3: Reading",
+            "link": "https://www.youtube.com/results?search_query=sinhala+lessons"
+        },
+        "History": {
+            "plan": "Day 1: Events\nDay 2: Dates\nDay 3: Revision",
+            "link": "https://www.youtube.com/results?search_query=history+lessons"
+        },
+        "ICT": {
+            "plan": "Day 1: Theory\nDay 2: Practical\nDay 3: Revision",
+            "link": "https://www.youtube.com/results?search_query=ict+lessons"
+        }
+    }
+
+    plan = study_plan.get(weak)
+
+    if plan:
+        st.write(f"### 🔴 Focus on: {weak}")
+        st.write(plan["plan"])
+        st.markdown(f"[🎥 Watch Lessons]({plan['link']})")
+
+    # Charts
     st.progress(int(avg))
 
-    # 📊 Bar chart
-    df = pd.DataFrame({
-        "Subjects": subjects,
-        "Marks": marks
-    })
+    df = pd.DataFrame({"Subjects": subjects, "Marks": marks})
     st.bar_chart(df.set_index("Subjects"))
 
-    # 🥧 Pie chart
     fig, ax = plt.subplots()
     ax.pie(marks, labels=subjects, autopct='%1.1f%%')
     st.pyplot(fig)
 
-# 📈 PROGRESS TRACKER
+# PROGRESS TRACKER
 st.markdown("## 📈 Student Progress Tracker")
 
 if name and name in st.session_state.progress:
-    progress_data = st.session_state.progress[name]
+    data = st.session_state.progress[name]
 
-    df_progress = pd.DataFrame({
-        "Attempt": list(range(1, len(progress_data)+1)),
-        "Average": progress_data
+    dfp = pd.DataFrame({
+        "Attempt": list(range(1, len(data)+1)),
+        "Average": data
     })
 
-    st.line_chart(df_progress.set_index("Attempt"))
+    st.line_chart(dfp.set_index("Attempt"))
 
-# 📋 STUDENT RECORDS
+# RECORDS
 if st.session_state.students:
     st.markdown("## 📋 Student Records")
-
     df_all = pd.DataFrame(st.session_state.students)
     st.dataframe(df_all)
 
-    # 🏆 Top performer
-    top = df_all.loc[df_all["Average"].idxmax()]
-    st.success(f"🏆 Top Performer: {top['Name']} ({round(top['Average'],2)})")
-
-    # 📥 Download CSV
-    csv = df_all.to_csv(index=False).encode('utf-8')
-    st.download_button("📥 Download Data", csv, "students.csv", "text/csv")
-
-# 📊 DATASET DASHBOARD
-st.markdown("## 📊 Dataset Analysis")
-
-file = st.file_uploader("Upload CSV", type=["csv"])
-
-if file:
-    df = pd.read_csv(file)
-    st.dataframe(df.head())
-
-    if "Average" in df.columns:
-        st.bar_chart(df["Average"])
-
-# 🧾 FOOTER
+# FOOTER
 st.markdown("---")
-st.markdown("🚀 Final AI Project | Developed by Dasun")
+st.markdown("🚀 Final AI Project | Dasun")
