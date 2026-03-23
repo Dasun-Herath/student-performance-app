@@ -1,196 +1,186 @@
 import streamlit as st
 import pandas as pd
-import matplotlib.pyplot as plt
+import pyrebase
+from openai import OpenAI
 
-# 📱 Mobile UI
 st.set_page_config(page_title="Student Analyzer", layout="centered")
 
-# 🔐 LOGIN
-users = {"admin": "1234", "student": "pass"}
+# 🔥 OPENAI API (replace key)
+import os
+from openai import OpenAI
 
-if "logged_in" not in st.session_state:
-    st.session_state.logged_in = False
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
+# 🔥 FIREBASE CONFIG (replace yours)
+firebaseConfig = {
+    "apiKey": "YOUR_KEY",
+    "authDomain": "YOUR_DOMAIN",
+    "databaseURL": "YOUR_DB_URL",
+    "projectId": "YOUR_ID",
+    "storageBucket": "YOUR_BUCKET",
+    "messagingSenderId": "XXX",
+    "appId": "XXX"
+}
+
+firebase = pyrebase.initialize_app(firebaseConfig)
+auth = firebase.auth()
+db = firebase.database()
+
+# SESSION
 if "user" not in st.session_state:
-    st.session_state.user = ""
+    st.session_state.user = None
 
-if not st.session_state.logged_in:
-    st.title("🔐 Login")
+# MENU
+menu = ["Login", "Signup"]
+choice = st.sidebar.selectbox("Account", menu)
 
-    username = st.text_input("Username")
+# SIGNUP
+if choice == "Signup":
+    st.title("Create Account")
+    email = st.text_input("Email")
+    password = st.text_input("Password", type="password")
+
+    if st.button("Signup"):
+        try:
+            auth.create_user_with_email_and_password(email, password)
+            st.success("Account created ✅")
+        except:
+            st.error("Signup failed ❌")
+
+# LOGIN
+if choice == "Login":
+    st.title("Login")
+    email = st.text_input("Email")
     password = st.text_input("Password", type="password")
 
     if st.button("Login"):
-        if username in users and users[username] == password:
-            st.session_state.logged_in = True
-            st.session_state.user = username
-            st.success("Login Success ✅")
-            st.rerun()
+        try:
+            user = auth.sign_in_with_email_and_password(email, password)
+            st.session_state.user = user
+            st.success("Login success ✅")
+        except:
+            st.error("Login failed ❌")
+
+# AFTER LOGIN
+if st.session_state.user:
+
+    st.title("🎓 Student Performance Analyzer")
+
+    # SESSION STORAGE
+    if "progress" not in st.session_state:
+        st.session_state.progress = {}
+
+    if "subject_progress" not in st.session_state:
+        st.session_state.subject_progress = {}
+
+    # INPUT
+    name = st.text_input("Student Name")
+    study_hours = st.slider("Study Hours", 0, 10, 2)
+
+    maths = st.number_input("Maths", 0, 100)
+    science = st.number_input("Science", 0, 100)
+    english = st.number_input("English", 0, 100)
+    sinhala = st.number_input("Sinhala", 0, 100)
+    history = st.number_input("History", 0, 100)
+    ict = st.number_input("ICT", 0, 100)
+
+    if st.button("🚀 Analyze"):
+
+        marks = [maths, science, english, sinhala, history, ict]
+        subjects = ["Maths","Science","English","Sinhala","History","ICT"]
+
+        avg = sum(marks)/len(marks)
+        weak = subjects[marks.index(min(marks))]
+        strong = subjects[marks.index(max(marks))]
+
+        # 🎯 Exam readiness
+        readiness = (avg * 0.7) + (study_hours * 5)
+        readiness = max(0, min(100, readiness))
+
+        # 🎮 Gamification
+        points = int(avg)
+        if avg >= 85:
+            badge = "🏆 Gold"
+        elif avg >= 70:
+            badge = "🥈 Silver"
+        elif avg >= 55:
+            badge = "🥉 Bronze"
         else:
-            st.error("Invalid Login ❌")
+            badge = "📘 Beginner"
 
-    st.stop()
+        # SAVE LOCAL PROGRESS
+        if name:
+            st.session_state.progress.setdefault(name, []).append(avg)
 
-# 🔓 Logout
-if st.button("Logout"):
-    st.session_state.logged_in = False
-    st.session_state.user = ""
-    st.rerun()
+            st.session_state.subject_progress.setdefault(name, {
+                "Maths":[], "Science":[], "English":[],
+                "Sinhala":[], "History":[], "ICT":[]
+            })
 
-# 🎓 TITLE
-st.markdown("<h2 style='text-align: center;'>📱 Student Performance App</h2>", unsafe_allow_html=True)
+            st.session_state.subject_progress[name]["Maths"].append(maths)
+            st.session_state.subject_progress[name]["Science"].append(science)
+            st.session_state.subject_progress[name]["English"].append(english)
+            st.session_state.subject_progress[name]["Sinhala"].append(sinhala)
+            st.session_state.subject_progress[name]["History"].append(history)
+            st.session_state.subject_progress[name]["ICT"].append(ict)
 
-# SESSION STORAGE
-if "students" not in st.session_state:
-    st.session_state.students = []
+        # SAVE FIREBASE
+        db.child("students").push({
+            "name": name,
+            "maths": maths,
+            "science": science,
+            "english": english,
+            "average": avg
+        })
 
-if "progress" not in st.session_state:
-    st.session_state.progress = {}
+        # RESULTS
+        st.subheader("📊 Results")
+        st.write(f"Average: {round(avg,2)}")
+        st.write(f"Weak: {weak}")
+        st.write(f"Strong: {strong}")
 
-# 🔥 NEW SUBJECT PROGRESS
-if "subject_progress" not in st.session_state:
-    st.session_state.subject_progress = {}
+        st.subheader("🎯 Exam Readiness")
+        st.write(f"{round(readiness,2)}%")
+        st.progress(int(readiness))
 
-# INPUT
-st.write("### Enter Marks")
+        st.subheader("🎮 Gamification")
+        st.write(f"Points: {points}")
+        st.write(f"Badge: {badge}")
 
-name = st.text_input("Student Name")
-study_hours = st.slider("Study Hours", 0, 10, 2)
-goal = st.number_input("Target Average", 0, 100, 75)
+        df = pd.DataFrame({"Subjects": subjects, "Marks": marks})
+        st.bar_chart(df.set_index("Subjects"))
 
-maths = st.number_input("Maths", 0, 100)
-science = st.number_input("Science", 0, 100)
-english = st.number_input("English", 0, 100)
-sinhala = st.number_input("Sinhala", 0, 100)
-history = st.number_input("History", 0, 100)
-ict = st.number_input("ICT", 0, 100)
+    # 📈 PROGRESS
+    if name in st.session_state.progress:
+        st.subheader("📈 Overall Progress")
+        st.line_chart(st.session_state.progress[name])
 
-# ANALYZE
-if st.button("🚀 Analyze"):
+    if name in st.session_state.subject_progress:
+        st.subheader("📊 Subject-wise Progress")
+        df_sub = pd.DataFrame(st.session_state.subject_progress[name])
+        st.line_chart(df_sub)
 
-    marks = [maths, science, english, sinhala, history, ict]
-    subjects = ["Maths","Science","English","Sinhala","History","ICT"]
+    # 🤖 REAL AI CHATBOT
+    st.subheader("🤖 AI Study Assistant")
 
-    avg = sum(marks)/len(marks)
-    weak = subjects[marks.index(min(marks))]
-    strong = subjects[marks.index(max(marks))]
+    user_question = st.text_input("Ask anything about studies...")
 
-    # 🎯 Exam Readiness
-    readiness = (avg * 0.7) + (study_hours * 5)
-    if avg < 50:
-        readiness -= 10
-    readiness = max(0, min(100, readiness))
+    if user_question:
+        with st.spinner("Thinking... 🤖"):
+            try:
+                response = client.chat.completions.create(
+                    model="gpt-4.1-mini",
+                    messages=[
+                        {"role": "system", "content": "You are a helpful student tutor."},
+                        {"role": "user", "content": user_question}
+                    ]
+                )
 
-    # 🎮 Gamification
-    points = int(avg)
-    if avg >= 85:
-        badge = "🏆 Gold"
-    elif avg >= 70:
-        badge = "🥈 Silver"
-    elif avg >= 55:
-        badge = "🥉 Bronze"
-    else:
-        badge = "📘 Beginner"
+                answer = response.choices[0].message.content
+                st.success(answer)
 
-    # SAVE GENERAL DATA
-    st.session_state.students.append({
-        "Name": name if name else "Unknown",
-        "Average": avg
-    })
+            except:
+                st.error("AI Error ❌ Check API key")
 
-    # 📈 SAVE TOTAL PROGRESS
-    if name:
-        if name not in st.session_state.progress:
-            st.session_state.progress[name] = []
-        st.session_state.progress[name].append(avg)
-
-    # 📊 SAVE SUBJECT PROGRESS
-    if name:
-        if name not in st.session_state.subject_progress:
-            st.session_state.subject_progress[name] = {
-                "Maths": [],
-                "Science": [],
-                "English": [],
-                "Sinhala": [],
-                "History": [],
-                "ICT": []
-            }
-
-        st.session_state.subject_progress[name]["Maths"].append(maths)
-        st.session_state.subject_progress[name]["Science"].append(science)
-        st.session_state.subject_progress[name]["English"].append(english)
-        st.session_state.subject_progress[name]["Sinhala"].append(sinhala)
-        st.session_state.subject_progress[name]["History"].append(history)
-        st.session_state.subject_progress[name]["ICT"].append(ict)
-
-    # RESULTS
-    st.write("## Results")
-    st.write(f"Average: {round(avg,2)}")
-    st.write(f"Weak: {weak}")
-    st.write(f"Strong: {strong}")
-
-    # 🎯 Readiness
-    st.subheader("Exam Readiness")
-    st.write(f"{round(readiness,2)}%")
-    st.progress(int(readiness))
-
-    # 🎮 Gamification
-    st.subheader("Gamification")
-    st.write(f"Points: {points}")
-    st.write(f"Badge: {badge}")
-
-    # 📚 Study Tip
-    st.subheader("Study Tip")
-    st.write(f"Focus more on {weak}")
-
-    # Chart
-    df = pd.DataFrame({"Subjects": subjects, "Marks": marks})
-    st.bar_chart(df.set_index("Subjects"))
-
-# 📈 TOTAL PROGRESS
-st.markdown("## 📈 Overall Progress")
-
-if name and name in st.session_state.progress:
-    st.line_chart(st.session_state.progress[name])
-
-# 📊 SUBJECT PROGRESS (NEW 🔥)
-st.markdown("## 📊 Subject-wise Progress")
-
-if name and name in st.session_state.subject_progress:
-    df_sub = pd.DataFrame(st.session_state.subject_progress[name])
-    st.line_chart(df_sub)
-
-# 🧑‍🏫 ADMIN DASHBOARD
-if st.session_state.user == "admin":
-    st.write("## Admin Dashboard")
-
-    if st.session_state.students:
-        df_all = pd.DataFrame(st.session_state.students)
-
-        st.write("Class Average:", round(df_all["Average"].mean(),2))
-
-        top = df_all.loc[df_all["Average"].idxmax()]
-        st.write("Top Performer:", top["Name"])
-
-        weak_students = df_all[df_all["Average"] < 50]
-        st.write("Weak Students:")
-        st.dataframe(weak_students)
-
-# 🤖 AI CHATBOT
-st.markdown("## 🤖 AI Assistant")
-
-q = st.text_input("Ask question")
-
-if q:
-    if "math" in q.lower():
-        st.write("Practice maths daily.")
-    elif "english" in q.lower():
-        st.write("Improve vocabulary.")
-    elif "science" in q.lower():
-        st.write("Revise with diagrams.")
-    else:
-        st.write("Study regularly and stay focused.")
-
-# FOOTER
-st.markdown("---")
-st.write("🚀 Developed by Dasun")
+    st.markdown("---")
+    st.write("🚀 Developed by Dasun")
