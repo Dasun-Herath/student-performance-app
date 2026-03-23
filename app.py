@@ -38,11 +38,11 @@ if choice == "Signup":
     password = st.text_input("Password", type="password")
 
     if st.button("Signup"):
-        try:
-            auth.create_user_with_email_and_password(email, password)
-            st.success("Account created ✅")
-        except Exception as e:    
-    st.error(e)
+       try:
+    auth.create_user_with_email_and_password(email, password)
+    st.success("Account created")
+except Exception as e:
+    st.error(e)   # ✅ indent තියෙනවා
 
 # LOGIN
 if choice == "Login":
