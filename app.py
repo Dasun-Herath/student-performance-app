@@ -41,8 +41,8 @@ if choice == "Signup":
         try:
             auth.create_user_with_email_and_password(email, password)
             st.success("Account created ✅")
-        except:
-            st.error("Signup failed ❌")
+        except Exception as e:
+    st.error(e)
 
 # LOGIN
 if choice == "Login":
