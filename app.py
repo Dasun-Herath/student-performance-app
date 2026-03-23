@@ -77,39 +77,28 @@ if st.session_state.user:
 
     if st.button("Analyze"):
 
-        marks = [maths, science, english, sinhala, history, ict]
-        subjects = ["Maths","Science","English","Sinhala","History","ICT"]
+    marks = [maths, science, english, sinhala, history, ict]
+    subjects = ["Maths","Science","English","Sinhala","History","ICT"]
 
-        avg = sum(marks)/len(marks)
-        weak = subjects[marks.index(min(marks))]
-        strong = subjects[marks.index(max(marks))]
+    avg = sum(marks) / len(marks)
 
-        readiness = (avg * 0.7) + (study_hours * 5)
-        readiness = max(0, min(100, readiness))
+    weak = subjects[marks.index(min(marks))]
+    strong = subjects[marks.index(max(marks))]
 
-        st.subheader("📊 Results")
-        st.write(f"Average: {round(avg,2)}")
-        st.write(f"Weak Subject: {weak}")
-        st.write(f"Strong Subject: {strong}")
+    st.subheader("📊 Results")
+    st.write(f"Average: {round(avg,2)}")
+    st.write(f"Weak Subject: {weak}")
+    st.write(f"Strong Subject: {strong}")
 
-        st.subheader("🎯 Exam Readiness")
-        st.progress(int(readiness))
-
-        df = pd.DataFrame({
-            "Subjects": subjects,
-            "Marks": marks
+    # Firebase save (FIXED)
+    try:
+        db.child("students").push({
+            "name": name,
+            "average": avg
         })
-        st.bar_chart(df.set_index("Subjects"))
-
-        # Save to Firebase
-       try:
-            db.child("students").push({
-                "name": name,
-                "average": avg
-            })
-            st.success("Saved to Firebase ✅")
-        except Exception as e:
-            st.error(e)
+        st.success("Saved to Firebase ✅")
+    except Exception as e:
+        st.error(e)
     # ================= AI CHATBOT =================
     st.subheader("🤖 AI Study Assistant")
 
