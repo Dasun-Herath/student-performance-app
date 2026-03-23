@@ -10,7 +10,7 @@ client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
 # 🔥 Firebase Config (replace with yours)
 firebaseConfig = {
-    "apiKey": "YOUR_KEY",
+    "apiKey": "AIzaSyC6OCrNCf-ETEejrair_J-wHnsYspOOk1I",
     "authDomain": "YOUR_DOMAIN",
     "databaseURL": "YOUR_DB_URL",
     "projectId": "YOUR_ID",
