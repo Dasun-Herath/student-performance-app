@@ -12,10 +12,10 @@ client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 firebaseConfig = {
     "apiKey": "AIzaSyC6OCrNCf-ETEejrair_J-wHnsYspOOk1I",
     "authDomain": "YOUR_DOMAIN",
-    "databaseURL": "YOUR_DB_URL",
-    "projectId": "YOUR_ID",
+    "databaseURL": "https://console.firebase.google.com/project/student-app-3f444/database/student-app-3f444-default-rtdb/data/~2F",
+    "projectId": "student-app-3f444",
     "storageBucket": "YOUR_BUCKET",
-    "messagingSenderId": "XXX",
+    "messagingSenderId": "477856584881",
     "appId": "XXX"
 }
 
