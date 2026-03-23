@@ -102,10 +102,14 @@ if st.session_state.user:
         st.bar_chart(df.set_index("Subjects"))
 
         # Save to Firebase
-        db.child("students").push({
-            "name": name,
-            "average": avg
-        })
+        try:
+    db.child("students").push({
+        "name": name,
+        "average": avg
+    })
+    st.success("Saved to Firebase ✅")
+except Exception as e:
+    st.error(e)
 
     # ================= AI CHATBOT =================
     st.subheader("🤖 AI Study Assistant")
