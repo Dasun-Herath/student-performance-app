@@ -1,17 +1,15 @@
 import streamlit as st
 import pandas as pd
 import pyrebase
+import os
 from openai import OpenAI
 
 st.set_page_config(page_title="Student Analyzer", layout="centered")
 
-# 🔥 OPENAI API (replace key)
-import os
-from openai import OpenAI
-
+# 🔐 SECURE API KEY
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-# 🔥 FIREBASE CONFIG (replace yours)
+# 🔥 FIREBASE CONFIG
 firebaseConfig = {
     "apiKey": "YOUR_KEY",
     "authDomain": "YOUR_DOMAIN",
@@ -30,7 +28,6 @@ db = firebase.database()
 if "user" not in st.session_state:
     st.session_state.user = None
 
-# MENU
 menu = ["Login", "Signup"]
 choice = st.sidebar.selectbox("Account", menu)
 
@@ -66,14 +63,12 @@ if st.session_state.user:
 
     st.title("🎓 Student Performance Analyzer")
 
-    # SESSION STORAGE
     if "progress" not in st.session_state:
         st.session_state.progress = {}
 
     if "subject_progress" not in st.session_state:
         st.session_state.subject_progress = {}
 
-    # INPUT
     name = st.text_input("Student Name")
     study_hours = st.slider("Study Hours", 0, 10, 2)
 
@@ -93,22 +88,12 @@ if st.session_state.user:
         weak = subjects[marks.index(min(marks))]
         strong = subjects[marks.index(max(marks))]
 
-        # 🎯 Exam readiness
         readiness = (avg * 0.7) + (study_hours * 5)
         readiness = max(0, min(100, readiness))
 
-        # 🎮 Gamification
         points = int(avg)
-        if avg >= 85:
-            badge = "🏆 Gold"
-        elif avg >= 70:
-            badge = "🥈 Silver"
-        elif avg >= 55:
-            badge = "🥉 Bronze"
-        else:
-            badge = "📘 Beginner"
+        badge = "🏆 Gold" if avg >= 85 else "🥈 Silver" if avg >= 70 else "🥉 Bronze"
 
-        # SAVE LOCAL PROGRESS
         if name:
             st.session_state.progress.setdefault(name, []).append(avg)
 
@@ -124,63 +109,43 @@ if st.session_state.user:
             st.session_state.subject_progress[name]["History"].append(history)
             st.session_state.subject_progress[name]["ICT"].append(ict)
 
-        # SAVE FIREBASE
         db.child("students").push({
             "name": name,
-            "maths": maths,
-            "science": science,
-            "english": english,
             "average": avg
         })
 
-        # RESULTS
         st.subheader("📊 Results")
         st.write(f"Average: {round(avg,2)}")
         st.write(f"Weak: {weak}")
         st.write(f"Strong: {strong}")
 
-        st.subheader("🎯 Exam Readiness")
-        st.write(f"{round(readiness,2)}%")
         st.progress(int(readiness))
-
-        st.subheader("🎮 Gamification")
-        st.write(f"Points: {points}")
-        st.write(f"Badge: {badge}")
 
         df = pd.DataFrame({"Subjects": subjects, "Marks": marks})
         st.bar_chart(df.set_index("Subjects"))
 
-    # 📈 PROGRESS
     if name in st.session_state.progress:
-        st.subheader("📈 Overall Progress")
         st.line_chart(st.session_state.progress[name])
 
     if name in st.session_state.subject_progress:
-        st.subheader("📊 Subject-wise Progress")
         df_sub = pd.DataFrame(st.session_state.subject_progress[name])
         st.line_chart(df_sub)
 
-    # 🤖 REAL AI CHATBOT
-    st.subheader("🤖 AI Study Assistant")
+    # 🤖 AI CHATBOT
+    st.subheader("🤖 AI Assistant")
 
-    user_question = st.text_input("Ask anything about studies...")
+    q = st.text_input("Ask anything...")
 
-    if user_question:
-        with st.spinner("Thinking... 🤖"):
+    if q:
+        with st.spinner("Thinking..."):
             try:
                 response = client.chat.completions.create(
                     model="gpt-4.1-mini",
                     messages=[
-                        {"role": "system", "content": "You are a helpful student tutor."},
-                        {"role": "user", "content": user_question}
+                        {"role": "system", "content": "You are a helpful tutor."},
+                        {"role": "user", "content": q}
                     ]
                 )
-
-                answer = response.choices[0].message.content
-                st.success(answer)
-
+                st.success(response.choices[0].message.content)
             except:
-                st.error("AI Error ❌ Check API key")
-
-    st.markdown("---")
-    st.write("🚀 Developed by Dasun")
+                st.error("Check API key ❌")
