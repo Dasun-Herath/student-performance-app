@@ -4,7 +4,7 @@ import pyrebase
 
 st.set_page_config(page_title="Student App", layout="centered")
 
-# Firebase config (ඔයාගේ details දාන්න)
+# Firebase config 
 firebaseConfig = {
     "apiKey": "AIzaSyC6OCrNCf-ETEejrair_J-wHnsYspOOk1I",
     "authDomain": "your-app.firebaseapp.com",
@@ -85,11 +85,15 @@ elif st.session_state.page == "app":
 
     if st.button("Analyze"):
 
-        # Marks
-        marks = [maths, science, english, sinhala, history, ict]
-        subjects = ["Maths", "Science", "English", "Sinhala", "History", "ICT"]
+    marks = [maths, science, english, sinhala, history, ict]
+    subjects = ["Maths","Science","English","Sinhala","History","ICT"]
 
-        df = pd.DataFrame({
+    avg = sum(marks) / len(marks)
+
+    st.write(f"Average: {round(avg,2)}")
+
+    # ✅ chart MUST be inside
+    df = pd.DataFrame({
         "Subjects": subjects,
         "Marks": marks
     })
