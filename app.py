@@ -171,7 +171,7 @@ if st.session_state.user:
     except Exception as e:
         st.error(e)
 
-    # 🏆 LEADERBOARD
+    # 🏆 LEADERBOARD (FIXED)
 
 st.subheader("🏆 Student Leaderboard")
 
@@ -181,17 +181,19 @@ try:
 
     if data.each():
         for item in data.each():
-            records.append(item.val())
+            val = item.val()
+
+            # ❗ FILTER empty names
+            if val.get("name") and val.get("name") != "":
+                records.append(val)
 
     if records:
         df_leaderboard = pd.DataFrame(records)
 
-        # sort by average (high to low)
         df_leaderboard = df_leaderboard.sort_values(by="average", ascending=False)
 
         st.dataframe(df_leaderboard)
 
-        # Top 3 highlight
         st.subheader("🥇 Top 3 Students")
 
         top3 = df_leaderboard.head(3)
@@ -200,11 +202,10 @@ try:
             st.write(f"🏅 {row['name']} - {round(row['average'],2)}")
 
     else:
-        st.info("No leaderboard data yet")
+        st.info("No valid leaderboard data")
 
 except Exception as e:
     st.error(e)
-
     # 🤖 AI Chatbot
     st.subheader("🤖 AI Assistant")
 
