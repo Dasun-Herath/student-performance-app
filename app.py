@@ -1,12 +1,10 @@
 import streamlit as st
 import pandas as pd
 import pyrebase
-from openai import OpenAI
 
-st.set_page_config(page_title="Student Analyzer", layout="centered")
+st.set_page_config(page_title="Student App", layout="centered")
 
-client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
-
+# Firebase config (ඔයාගේ details දාන්න)
 firebaseConfig = {
     "apiKey": "AIzaSyC6OCrNCf-ETEejrair_J-wHnsYspOOk1I",
     "authDomain": "your-app.firebaseapp.com",
@@ -21,17 +19,40 @@ firebase = pyrebase.initialize_app(firebaseConfig)
 auth = firebase.auth()
 db = firebase.database()
 
+# Page state
+if "page" not in st.session_state:
+    st.session_state.page = "login"
+
 if "user" not in st.session_state:
     st.session_state.user = None
 
-menu = ["Login", "Signup"]
-choice = st.sidebar.selectbox("Account", menu)
+# ================= LOGIN PAGE =================
+if st.session_state.page == "login":
 
-# SIGNUP
-if choice == "Signup":
-    st.title("Signup")
+    st.title("🔐 Login")
+
     email = st.text_input("Email")
     password = st.text_input("Password", type="password")
+
+    if st.button("Login"):
+        try:
+            user = auth.sign_in_with_email_and_password(email, password)
+            st.session_state.user = user
+            st.session_state.page = "app"
+            st.success("Login success ✅")
+        except Exception as e:
+            st.error(e)
+
+    if st.button("Go to Signup"):
+        st.session_state.page = "signup"
+
+# ================= SIGNUP PAGE =================
+elif st.session_state.page == "signup":
+
+    st.title("📝 Signup")
+
+    email = st.text_input("New Email")
+    password = st.text_input("New Password", type="password")
 
     if st.button("Create Account"):
         try:
@@ -40,24 +61,17 @@ if choice == "Signup":
         except Exception as e:
             st.error(e)
 
-# LOGIN
-if choice == "Login":
-    st.title("Login")
-    email = st.text_input("Email")
-    password = st.text_input("Password", type="password")
+    if st.button("Back to Login"):
+        st.session_state.page = "login"
 
-    if st.button("Login"):
-        try:
-            user = auth.sign_in_with_email_and_password(email, password)
-            st.session_state.user = user
-            st.success("Login success ✅")
-        except Exception as e:
-            st.error(e)
-
-# AFTER LOGIN
-if st.session_state.user:
+# ================= MAIN APP =================
+elif st.session_state.page == "app":
 
     st.title("🎓 Student Performance Analyzer")
+
+    if st.button("Logout"):
+        st.session_state.page = "login"
+        st.session_state.user = None
 
     name = st.text_input("Student Name")
     study_hours = st.slider("Study Hours", 0, 10, 2)
