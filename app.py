@@ -4,7 +4,7 @@ import pyrebase
 
 st.set_page_config(page_title="Student App", layout="centered")
 
-# Firebase config 
+# Firebase config
 firebaseConfig = {
     "apiKey": "AIzaSyC6OCrNCf-ETEejrair_J-wHnsYspOOk1I",
     "authDomain": "your-app.firebaseapp.com",
@@ -19,14 +19,14 @@ firebase = pyrebase.initialize_app(firebaseConfig)
 auth = firebase.auth()
 db = firebase.database()
 
-# Page state
+# Session
 if "page" not in st.session_state:
     st.session_state.page = "login"
 
 if "user" not in st.session_state:
     st.session_state.user = None
 
-# ================= LOGIN PAGE =================
+# ================= LOGIN =================
 if st.session_state.page == "login":
 
     st.title("🔐 Login")
@@ -42,12 +42,12 @@ if st.session_state.page == "login":
             st.success("Login success ✅")
             st.rerun()
         except Exception as e:
-            st.error(e)
+            st.error("Login failed")
 
     if st.button("Go to Signup"):
         st.session_state.page = "signup"
 
-# ================= SIGNUP PAGE =================
+# ================= SIGNUP =================
 elif st.session_state.page == "signup":
 
     st.title("📝 Signup")
@@ -59,13 +59,13 @@ elif st.session_state.page == "signup":
         try:
             auth.create_user_with_email_and_password(email, password)
             st.success("Account created ✅")
-        except Exception as e:
-            st.error(e)
+        except Exception:
+            st.error("Signup failed")
 
     if st.button("Back to Login"):
         st.session_state.page = "login"
 
-# ================= MAIN APP =================
+# ================= APP =================
 elif st.session_state.page == "app":
 
     st.title("🎓 Student Performance Analyzer")
@@ -73,7 +73,9 @@ elif st.session_state.page == "app":
     if st.button("Logout"):
         st.session_state.page = "login"
         st.session_state.user = None
+        st.rerun()
 
+    # Inputs
     name = st.text_input("Student Name")
     study_hours = st.slider("Study Hours", 0, 10, 2)
 
@@ -84,102 +86,92 @@ elif st.session_state.page == "app":
     history = st.number_input("History", 0, 100)
     ict = st.number_input("ICT", 0, 100)
 
-if st.button("Analyze"):
+    # ================= ANALYZE =================
+    if st.button("Analyze"):
 
-    # ---------------- DATA ----------------
-    marks = [maths, science, english, sinhala, history, ict]
-    subjects = ["Maths", "Science", "English", "Sinhala", "History", "ICT"]
+        marks = [maths, science, english, sinhala, history, ict]
+        subjects = ["Maths","Science","English","Sinhala","History","ICT"]
 
-    avg = sum(marks) / len(marks)
+        avg = sum(marks) / len(marks)
 
-    if avg >= 75:
-    grade = "A"
-elif avg >= 65:
-    grade = "B"
-elif avg >= 50:
-    grade = "C"
-else:
-    grade = "F"
+        weak = subjects[marks.index(min(marks))]
+        strong = subjects[marks.index(max(marks))]
 
-st.write("Grade:", grade)
+        # Grade
+        if avg >= 75:
+            grade = "A"
+        elif avg >= 65:
+            grade = "B"
+        elif avg >= 50:
+            grade = "C"
+        else:
+            grade = "F"
 
-    weak = subjects[marks.index(min(marks))]
-    strong = subjects[marks.index(max(marks))]
+        # Results
+        st.subheader("📊 Results")
+        st.write("Average:", round(avg,2))
+        st.write("Grade:", grade)
+        st.write("Weak Subject:", weak)
+        st.write("Strong Subject:", strong)
 
-    # ---------------- RESULTS ----------------
-    st.subheader("📊 Results")
-    st.write("Average:", round(avg, 2))
-    st.write("Weak Subject:", weak)
-    st.write("Strong Subject:", strong)
+        # Smart Alerts
+        st.subheader("⚠️ Smart Alerts")
+        if avg < 50:
+            st.error("Very low performance")
+        elif avg < 65:
+            st.warning("Can improve")
+        else:
+            st.success("Good performance")
 
-    # ---------------- SMART ALERT ----------------
-    st.subheader("⚠️ Smart Alerts")
+        if min(marks) < 40:
+            st.warning(f"Improve {weak}")
 
-    if avg < 50:
-        st.error("🚨 Performance is very low!")
-    elif avg < 65:
-        st.warning("⚠️ Can improve more")
-    else:
-        st.success("✅ Good performance")
+        if study_hours < 2:
+            st.warning("Increase study hours")
 
-    if min(marks) < 40:
-        st.warning(f"⚠️ Improve {weak}")
+        # Study Plan
+        st.subheader("📚 Study Plan")
+        if study_hours <= 2:
+            st.write(f"Focus 1 hour on {weak}")
+        elif study_hours <= 5:
+            st.write(f"2 hours on {weak}, 1 hour on {strong}")
+        else:
+            st.write("Practice papers and revision")
 
-    if study_hours < 2:
-        st.warning("⏰ Increase study hours")
+        # YouTube
+        st.subheader("🎥 Learning Resources")
+        youtube_links = {
+            "Maths": "https://www.youtube.com/results?search_query=maths",
+            "Science": "https://www.youtube.com/results?search_query=science",
+            "English": "https://www.youtube.com/results?search_query=english",
+            "Sinhala": "https://www.youtube.com/results?search_query=sinhala",
+            "History": "https://www.youtube.com/results?search_query=history",
+            "ICT": "https://www.youtube.com/results?search_query=ict"
+        }
+        st.markdown(f"[Learn {weak}]({youtube_links.get(weak)})")
 
-    # ---------------- STUDY PLAN ----------------
-    st.subheader("📚 Study Plan")
+        # Save
+        if name.strip() == "":
+            st.error("Enter student name")
+        else:
+            try:
+                db.child("students").push({
+                    "name": name,
+                    "average": avg
+                })
+                st.success("Saved ✅")
+            except:
+                st.error("Save failed")
 
-    plan = []
+        # Chart
+        df = pd.DataFrame({
+            "Subjects": subjects,
+            "Marks": marks
+        })
+        st.bar_chart(df.set_index("Subjects"))
 
-    if study_hours <= 2:
-        plan.append(f"Focus 1 hour on {weak}")
-    elif study_hours <= 5:
-        plan.append(f"2 hours on {weak}, 1 hour on {strong}")
-    else:
-        plan.append("Practice papers and revision")
-
-    for p in plan:
-        st.write("✅", p)
-
-    # ---------------- YOUTUBE ----------------
-    st.subheader("🎥 Learning Resources")
-
-    youtube_links = {
-        "Maths": "https://www.youtube.com/results?search_query=maths+lessons",
-        "Science": "https://www.youtube.com/results?search_query=science+lessons",
-        "English": "https://www.youtube.com/results?search_query=english+grammar",
-        "Sinhala": "https://www.youtube.com/results?search_query=sinhala+lessons",
-        "History": "https://www.youtube.com/results?search_query=history+lessons",
-        "ICT": "https://www.youtube.com/results?search_query=ict+lessons"
-    }
-
-    link = youtube_links.get(weak)
-    st.markdown(f"[📺 Learn {weak}]({link})")
-
-    # ---------------- SAVE ----------------
-    if name.strip() == "":
-        st.error("❌ Enter student name")
-    else:
-        try:
-            db.child("students").push({
-                "name": name,
-                "average": avg
-            })
-            st.success("Saved to Firebase ✅")
-        except Exception as e:
-            st.error(e)
-
-    # ---------------- CHART ----------------
-    df = pd.DataFrame({
-        "Subjects": subjects,
-        "Marks": marks
-    })
-
-    st.bar_chart(df.set_index("Subjects"))
-    # 📈 Progress Tracker
-    st.subheader("📈 Progress Tracker")
+    # ================= LEADERBOARD =================
+    st.subheader("🏆 Leaderboard")
 
     try:
         data = db.child("students").get()
@@ -187,66 +179,33 @@ st.write("Grade:", grade)
 
         if data.each():
             for item in data.each():
-                records.append(item.val())
+                val = item.val()
+                if val.get("name"):
+                    records.append(val)
 
         if records:
-            df_progress = pd.DataFrame(records)
-            st.line_chart(df_progress["average"])
+            df = pd.DataFrame(records)
+            df = df.sort_values(by="average", ascending=False)
+
+            df.index += 1
+            st.dataframe(df)
+
+            st.subheader("🥇 Top 3")
+            for i, row in df.head(3).iterrows():
+                st.write(f"{row['name']} - {round(row['average'],2)}")
+
         else:
             st.info("No data yet")
 
-    except Exception as e:
-        st.error(e)
+    except:
+        st.error("Leaderboard error")
 
-    # 🏆 LEADERBOARD (FIXED)
+    # ================= PROGRESS =================
+    st.subheader("📈 Progress")
 
-st.subheader("🏆 Student Leaderboard")
-
-try:
-    data = db.child("students").get()
-    records = []
-
-    if data.each():
-        for item in data.each():
-            val = item.val()
-
-            # ❗ FILTER empty names
-            if val.get("name") and val.get("name") != "":
-                records.append(val)
-
-    if records:
-        df_leaderboard = pd.DataFrame(records)
-
-        df_leaderboard = df_leaderboard.sort_values(by="average", ascending=False)
-
-        st.dataframe(df_leaderboard)
-
-        st.subheader("🥇 Top 3 Students")
-
-        top3 = df_leaderboard.head(3)
-
-        for i, row in top3.iterrows():
-            st.write(f"🏅 {row['name']} - {round(row['average'],2)}")
-
-    else:
-        st.info("No valid leaderboard data")
-
-except Exception as e:
-    st.error(e)
-    # 🤖 AI Chatbot
-    st.subheader("🤖 AI Assistant")
-
-    question = st.text_input("Ask a question")
-
-    if question:
-        try:
-            response = client.chat.completions.create(
-                model="gpt-4.1-mini",
-                messages=[
-                    {"role": "system", "content": "You are a tutor."},
-                    {"role": "user", "content": question}
-                ]
-            )
-            st.success(response.choices[0].message.content)
-        except Exception as e:
-            st.error(e)
+    try:
+        if records:
+            df_progress = pd.DataFrame(records)
+            st.line_chart(df_progress["average"])
+    except:
+        st.error("Progress error")
