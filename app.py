@@ -116,18 +116,7 @@ elif st.session_state.page == "app":
     })
 
     st.bar_chart(df.set_index("Subjects"))
-    
-        avg = sum(marks) / len(marks)
-    
-        weak = subjects[marks.index(min(marks))]
-        strong = subjects[marks.index(max(marks))]
-    
-        # Results
-        st.subheader("📊 Results")
-        st.write(f"Average: {round(avg,2)}")
-        st.write(f"Weak Subject: {weak}")
-        st.write(f"Strong Subject: {strong}")
-    
+
         # 🚨 Smart Alerts
         st.subheader("⚠️ Smart Alerts")
     
