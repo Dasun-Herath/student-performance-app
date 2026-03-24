@@ -8,12 +8,12 @@ st.set_page_config(page_title="Student Analyzer", layout="centered")
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
 firebaseConfig = {
-    "apiKey": "AIzaSyXXXX",
+    "apiKey": "AIzaSyC6OCrNCf-ETEejrair_J-wHnsYspOOk1I",
     "authDomain": "your-app.firebaseapp.com",
     "databaseURL": "https://student-app-3f444-default-rtdb.firebaseio.com/",
-    "projectId": "your-app",
+    "projectId": "student-app-3f444",
     "storageBucket": "your-app.appspot.com",
-    "messagingSenderId": "XXX",
+    "messagingSenderId": "477856584881",
     "appId": "XXX"
 }
 
