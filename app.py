@@ -88,6 +88,12 @@ elif st.session_state.page == "app":
         # Marks
         marks = [maths, science, english, sinhala, history, ict]
         subjects = ["Maths", "Science", "English", "Sinhala", "History", "ICT"]
+
+        df = pd.DataFrame({
+        "Subjects": subjects,
+        "Marks": marks
+    })
+    st.bar_chart(df.set_index("Subjects"))
     
         avg = sum(marks) / len(marks)
     
