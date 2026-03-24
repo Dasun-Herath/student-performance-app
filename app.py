@@ -5,16 +5,16 @@ from openai import OpenAI
 
 st.set_page_config(page_title="Student Analyzer", layout="centered")
 
-# 🔐 OpenAI API (Streamlit Secrets)
+# OpenAI API
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
-# 🔥 Firebase Config (replace with yours)
+# Firebase Config (REPLACE WITH YOURS)
 firebaseConfig = {
     "apiKey": "AIzaSyC6OCrNCf-ETEejrair_J-wHnsYspOOk1I",
-    "authDomain": "YOUR_DOMAIN",
+    "authDomain": "your-app.firebaseapp.com",
     "databaseURL": "https://console.firebase.google.com/project/student-app-3f444/database/student-app-3f444-default-rtdb/data/~2F",
     "projectId": "student-app-3f444",
-    "storageBucket": "YOUR_BUCKET",
+    "storageBucket": "your-app.appspot.com",
     "messagingSenderId": "477856584881",
     "appId": "XXX"
 }
@@ -27,25 +27,24 @@ db = firebase.database()
 if "user" not in st.session_state:
     st.session_state.user = None
 
-# Sidebar Menu
 menu = ["Login", "Signup"]
 choice = st.sidebar.selectbox("Account", menu)
 
-# ================= SIGNUP =================
+# SIGNUP
 if choice == "Signup":
-    st.title("Create Account")
+    st.title("Signup")
 
     email = st.text_input("Email")
     password = st.text_input("Password", type="password")
 
-    if st.button("Signup"):
+    if st.button("Create Account"):
         try:
             auth.create_user_with_email_and_password(email, password)
             st.success("Account created ✅")
         except Exception as e:
             st.error(e)
 
-# ================= LOGIN =================
+# LOGIN
 if choice == "Login":
     st.title("Login")
 
@@ -60,7 +59,7 @@ if choice == "Login":
         except Exception as e:
             st.error(e)
 
-# ================= AFTER LOGIN =================
+# AFTER LOGIN
 if st.session_state.user:
 
     st.title("🎓 Student Performance Analyzer")
@@ -77,43 +76,50 @@ if st.session_state.user:
 
     if st.button("Analyze"):
 
-    marks = [maths, science, english, sinhala, history, ict]
-    subjects = ["Maths","Science","English","Sinhala","History","ICT"]
+        marks = [maths, science, english, sinhala, history, ict]
+        subjects = ["Maths","Science","English","Sinhala","History","ICT"]
 
-    avg = sum(marks) / len(marks)
+        avg = sum(marks) / len(marks)
 
-    weak = subjects[marks.index(min(marks))]
-    strong = subjects[marks.index(max(marks))]
+        weak = subjects[marks.index(min(marks))]
+        strong = subjects[marks.index(max(marks))]
 
-    st.subheader("📊 Results")
-    st.write(f"Average: {round(avg,2)}")
-    st.write(f"Weak Subject: {weak}")
-    st.write(f"Strong Subject: {strong}")
+        st.subheader("📊 Results")
+        st.write(f"Average: {round(avg,2)}")
+        st.write(f"Weak Subject: {weak}")
+        st.write(f"Strong Subject: {strong}")
 
-    # Firebase save (FIXED)
-    try:
-        db.child("students").push({
-            "name": name,
-            "average": avg
+        # Firebase save
+        try:
+            db.child("students").push({
+                "name": name,
+                "average": avg
+            })
+            st.success("Saved to Firebase ✅")
+        except Exception as e:
+            st.error(e)
+
+        # Chart
+        df = pd.DataFrame({
+            "Subjects": subjects,
+            "Marks": marks
         })
-        st.success("Saved to Firebase ✅")
-    except Exception as e:
-        st.error(e)
-    # ================= AI CHATBOT =================
+        st.bar_chart(df.set_index("Subjects"))
+
+    # AI Chatbot
     st.subheader("🤖 AI Study Assistant")
 
-    question = st.text_input("Ask a study question...")
+    question = st.text_input("Ask a question")
 
     if question:
-        with st.spinner("Thinking..."):
-            try:
-                response = client.chat.completions.create(
-                    model="gpt-4.1-mini",
-                    messages=[
-                        {"role": "system", "content": "You are a helpful tutor."},
-                        {"role": "user", "content": question}
-                    ]
-                )
-                st.success(response.choices[0].message.content)
-            except Exception as e:
-                st.error(e)
+        try:
+            response = client.chat.completions.create(
+                model="gpt-4.1-mini",
+                messages=[
+                    {"role": "system", "content": "You are a helpful tutor."},
+                    {"role": "user", "content": question}
+                ]
+            )
+            st.success(response.choices[0].message.content)
+        except Exception as e:
+            st.error(e)
