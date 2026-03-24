@@ -5,17 +5,15 @@ from openai import OpenAI
 
 st.set_page_config(page_title="Student Analyzer", layout="centered")
 
-# OpenAI API
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
-# Firebase Config (REPLACE WITH YOURS)
 firebaseConfig = {
-    "apiKey": "AIzaSyC6OCrNCf-ETEejrair_J-wHnsYspOOk1I",
+    "apiKey": "AIzaSyXXXX",
     "authDomain": "your-app.firebaseapp.com",
-    "databaseURL": "https://student-app-3f444-default-rtdb.firebaseio.com/:",
-    "projectId": "student-app-3f444",
+    "databaseURL": "https://student-app-3f444-default-rtdb.firebaseio.com/",
+    "projectId": "your-app",
     "storageBucket": "your-app.appspot.com",
-    "messagingSenderId": "477856584881",
+    "messagingSenderId": "XXX",
     "appId": "XXX"
 }
 
@@ -23,7 +21,6 @@ firebase = pyrebase.initialize_app(firebaseConfig)
 auth = firebase.auth()
 db = firebase.database()
 
-# Session
 if "user" not in st.session_state:
     st.session_state.user = None
 
@@ -33,7 +30,6 @@ choice = st.sidebar.selectbox("Account", menu)
 # SIGNUP
 if choice == "Signup":
     st.title("Signup")
-
     email = st.text_input("Email")
     password = st.text_input("Password", type="password")
 
@@ -47,7 +43,6 @@ if choice == "Signup":
 # LOGIN
 if choice == "Login":
     st.title("Login")
-
     email = st.text_input("Email")
     password = st.text_input("Password", type="password")
 
@@ -89,7 +84,6 @@ if st.session_state.user:
         st.write(f"Weak Subject: {weak}")
         st.write(f"Strong Subject: {strong}")
 
-        # Firebase save
         try:
             db.child("students").push({
                 "name": name,
@@ -99,14 +93,34 @@ if st.session_state.user:
         except Exception as e:
             st.error(e)
 
-        # Chart
         df = pd.DataFrame({
             "Subjects": subjects,
             "Marks": marks
         })
         st.bar_chart(df.set_index("Subjects"))
 
-    # AI Chatbot
+    # 📊 PROGRESS TRACKER
+    st.subheader("📈 Progress Tracker")
+
+    try:
+        data = db.child("students").get()
+        records = []
+
+        if data.each():
+            for item in data.each():
+                records.append(item.val())
+
+        if records:
+            df_progress = pd.DataFrame(records)
+
+            st.line_chart(df_progress["average"])
+        else:
+            st.info("No progress data yet")
+
+    except Exception as e:
+        st.error(e)
+
+    # 🤖 AI Chatbot
     st.subheader("🤖 AI Study Assistant")
 
     question = st.text_input("Ask a question")
