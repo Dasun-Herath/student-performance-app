@@ -84,21 +84,41 @@ if st.session_state.user:
         st.write(f"Weak Subject: {weak}")
         st.write(f"Strong Subject: {strong}")
 
-        # 🚨 SMART ALERT SYSTEM
+        # 🚨 SMART ALERT
         st.subheader("⚠️ Smart Alerts")
 
         if avg < 50:
-            st.error("🚨 Your overall performance is very low! Focus more on studies.")
+            st.error("🚨 Your performance is very low!")
         elif avg < 65:
-            st.warning("⚠️ Your performance is average. You can improve.")
+            st.warning("⚠️ You can improve more.")
         else:
-            st.success("✅ Good performance! Keep going!")
+            st.success("✅ Good performance!")
 
         if min(marks) < 40:
-            st.warning(f"⚠️ Your weakest subject is {weak}. Improve it!")
+            st.warning(f"⚠️ Improve {weak}")
 
         if study_hours < 2:
-            st.warning("⏰ Study hours are too low. Increase your study time!")
+            st.warning("⏰ Increase study hours")
+
+        # 📚 STUDY PLAN
+        st.subheader("📚 Study Plan")
+
+        plan = []
+
+        if study_hours <= 2:
+            plan.append(f"Focus 1 hour on {weak}")
+            plan.append("Revise basic concepts")
+        elif study_hours <= 5:
+            plan.append(f"Spend 2 hours on {weak}")
+            plan.append(f"1 hour practice on {strong}")
+            plan.append("Revise notes daily")
+        else:
+            plan.append(f"Deep study 3 hours on {weak}")
+            plan.append("Solve past papers")
+            plan.append("Group study / discussion")
+
+        for p in plan:
+            st.write("✅ " + p)
 
         # Firebase save
         try:
@@ -131,13 +151,13 @@ if st.session_state.user:
             df_progress = pd.DataFrame(records)
             st.line_chart(df_progress["average"])
         else:
-            st.info("No progress data yet")
+            st.info("No data yet")
 
     except Exception as e:
         st.error(e)
 
     # 🤖 AI Chatbot
-    st.subheader("🤖 AI Study Assistant")
+    st.subheader("🤖 AI Assistant")
 
     question = st.text_input("Ask a question")
 
@@ -146,7 +166,7 @@ if st.session_state.user:
             response = client.chat.completions.create(
                 model="gpt-4.1-mini",
                 messages=[
-                    {"role": "system", "content": "You are a helpful tutor."},
+                    {"role": "system", "content": "You are a tutor."},
                     {"role": "user", "content": question}
                 ]
             )
