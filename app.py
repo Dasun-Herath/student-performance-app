@@ -72,7 +72,7 @@ if st.session_state.user:
     if st.button("Analyze"):
 
         if name.strip() == "":
-    st.error("❌ Please enter student name")
+            st.error("❌ Please enter student name")   # ✅ indent
 else:
     db.child("students").push({
         "name": name,
