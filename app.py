@@ -71,84 +71,84 @@ if st.session_state.user:
 
     if st.button("Analyze"):
 
-    # Marks
-    marks = [maths, science, english, sinhala, history, ict]
-    subjects = ["Maths", "Science", "English", "Sinhala", "History", "ICT"]
-
-    avg = sum(marks) / len(marks)
-
-    weak = subjects[marks.index(min(marks))]
-    strong = subjects[marks.index(max(marks))]
-
-    # Results
-    st.subheader("📊 Results")
-    st.write(f"Average: {round(avg,2)}")
-    st.write(f"Weak Subject: {weak}")
-    st.write(f"Strong Subject: {strong}")
-
-    # 🚨 Smart Alerts
-    st.subheader("⚠️ Smart Alerts")
-
-    if avg < 50:
-        st.error("🚨 Your performance is very low!")
-    elif avg < 65:
-        st.warning("⚠️ You can improve more.")
-    else:
-        st.success("✅ Good performance!")
-
-    if min(marks) < 40:
-        st.warning(f"⚠️ Improve {weak}")
-
-    if study_hours < 2:
-        st.warning("⏰ Increase study hours")
-
-    # 📚 Study Plan
-    st.subheader("📚 Study Plan")
-
-    plan = []
-
-    if study_hours <= 2:
-        plan.append(f"Focus 1 hour on {weak}")
-        plan.append("Revise basics")
-    elif study_hours <= 5:
-        plan.append(f"Spend 2 hours on {weak}")
-        plan.append(f"1 hour on {strong}")
-    else:
-        plan.append(f"Deep study 3 hours on {weak}")
-        plan.append("Practice papers")
-
-    for p in plan:
-        st.write("✅ " + p)
-
-    # 🎥 YouTube Links
-    st.subheader("🎥 Learning Resources")
-
-    youtube_links = {
-        "Maths": "https://www.youtube.com/results?search_query=maths+lessons",
-        "Science": "https://www.youtube.com/results?search_query=science+lessons",
-        "English": "https://www.youtube.com/results?search_query=english+grammar",
-        "Sinhala": "https://www.youtube.com/results?search_query=sinhala+lessons",
-        "History": "https://www.youtube.com/results?search_query=history+lessons",
-        "ICT": "https://www.youtube.com/results?search_query=ict+lessons"
-    }
-
-    link = youtube_links.get(weak)
-
-    st.write(f"📺 Learn {weak}:")
-    st.markdown(f"[Click here to watch]({link})")
-
-    # ✅ Name validation + Firebase save
-    if name.strip() == "":
-        st.error("❌ Please enter student name")
-    else:
-        try:
-            db.child("students").push({
-                "name": name,
-                "average": avg
-            })
-            st.success("Saved to Firebase ✅")
-        except Exception as e:
-            st.error(e)
+        # Marks
+        marks = [maths, science, english, sinhala, history, ict]
+        subjects = ["Maths", "Science", "English", "Sinhala", "History", "ICT"]
+    
+        avg = sum(marks) / len(marks)
+    
+        weak = subjects[marks.index(min(marks))]
+        strong = subjects[marks.index(max(marks))]
+    
+        # Results
+        st.subheader("📊 Results")
+        st.write(f"Average: {round(avg,2)}")
+        st.write(f"Weak Subject: {weak}")
+        st.write(f"Strong Subject: {strong}")
+    
+        # 🚨 Smart Alerts
+        st.subheader("⚠️ Smart Alerts")
+    
+        if avg < 50:
+            st.error("🚨 Your performance is very low!")
+        elif avg < 65:
+            st.warning("⚠️ You can improve more.")
+        else:
+            st.success("✅ Good performance!")
+    
+        if min(marks) < 40:
+            st.warning(f"⚠️ Improve {weak}")
+    
+        if study_hours < 2:
+            st.warning("⏰ Increase study hours")
+    
+        # 📚 Study Plan
+        st.subheader("📚 Study Plan")
+    
+        plan = []
+    
+        if study_hours <= 2:
+            plan.append(f"Focus 1 hour on {weak}")
+            plan.append("Revise basics")
+        elif study_hours <= 5:
+            plan.append(f"Spend 2 hours on {weak}")
+            plan.append(f"1 hour on {strong}")
+        else:
+            plan.append(f"Deep study 3 hours on {weak}")
+            plan.append("Practice papers")
+    
+        for p in plan:
+            st.write("✅ " + p)
+    
+        # 🎥 YouTube Links
+        st.subheader("🎥 Learning Resources")
+    
+        youtube_links = {
+            "Maths": "https://www.youtube.com/results?search_query=maths+lessons",
+            "Science": "https://www.youtube.com/results?search_query=science+lessons",
+            "English": "https://www.youtube.com/results?search_query=english+grammar",
+            "Sinhala": "https://www.youtube.com/results?search_query=sinhala+lessons",
+            "History": "https://www.youtube.com/results?search_query=history+lessons",
+            "ICT": "https://www.youtube.com/results?search_query=ict+lessons"
+        }
+    
+        link = youtube_links.get(weak)
+    
+        st.write(f"📺 Learn {weak}:")
+        st.markdown(f"[Click here to watch]({link})")
+    
+        # ✅ Name validation + Firebase save
+        if name.strip() == "":
+            st.error("❌ Please enter student name")
+        else:
+            try:
+                db.child("students").push({
+                    "name": name,
+                    "average": avg
+                })
+                st.success("Saved to Firebase ✅")
+            except Exception as e:
+                st.error(e)
 
     # Chart
     df = pd.DataFrame({
