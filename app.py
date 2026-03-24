@@ -71,6 +71,14 @@ if st.session_state.user:
 
     if st.button("Analyze"):
 
+        if name.strip() == "":
+    st.error("❌ Please enter student name")
+else:
+    db.child("students").push({
+        "name": name,
+        "average": avg
+    })
+    
         marks = [maths, science, english, sinhala, history, ict]
         subjects = ["Maths","Science","English","Sinhala","History","ICT"]
 
