@@ -83,32 +83,19 @@ elif st.session_state.page == "app":
     history = st.number_input("History", 0, 100)
     ict = st.number_input("ICT", 0, 100)
 
-   if st.button("Analyze"):
+if st.button("Analyze"):
 
     marks = [maths, science, english, sinhala, history, ict]
-    subjects = ["Maths", "Science", "English", "Sinhala", "History", "ICT"]
+    subjects = ["Maths","Science","English","Sinhala","History","ICT"]
 
     avg = sum(marks) / len(marks)
 
     weak = subjects[marks.index(min(marks))]
     strong = subjects[marks.index(max(marks))]
 
-    st.subheader("Results")
     st.write("Average:", round(avg,2))
-    st.write("Weak Subject:", weak)
-    st.write("Strong Subject:", strong)
-
-    if name.strip() == "":
-        st.error("Enter name")
-    else:
-        try:
-            db.child("students").push({
-                "name": name,
-                "average": avg
-            })
-            st.success("Saved")
-        except Exception as e:
-            st.error(e)
+    st.write("Weak:", weak)
+    st.write("Strong:", strong)
 
     df = pd.DataFrame({
         "Subjects": subjects,
