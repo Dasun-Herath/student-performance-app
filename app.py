@@ -84,6 +84,23 @@ if st.session_state.user:
         st.write(f"Weak Subject: {weak}")
         st.write(f"Strong Subject: {strong}")
 
+        # 🚨 SMART ALERT SYSTEM
+        st.subheader("⚠️ Smart Alerts")
+
+        if avg < 50:
+            st.error("🚨 Your overall performance is very low! Focus more on studies.")
+        elif avg < 65:
+            st.warning("⚠️ Your performance is average. You can improve.")
+        else:
+            st.success("✅ Good performance! Keep going!")
+
+        if min(marks) < 40:
+            st.warning(f"⚠️ Your weakest subject is {weak}. Improve it!")
+
+        if study_hours < 2:
+            st.warning("⏰ Study hours are too low. Increase your study time!")
+
+        # Firebase save
         try:
             db.child("students").push({
                 "name": name,
@@ -99,7 +116,7 @@ if st.session_state.user:
         })
         st.bar_chart(df.set_index("Subjects"))
 
-    # 📊 PROGRESS TRACKER
+    # 📈 Progress Tracker
     st.subheader("📈 Progress Tracker")
 
     try:
@@ -112,7 +129,6 @@ if st.session_state.user:
 
         if records:
             df_progress = pd.DataFrame(records)
-
             st.line_chart(df_progress["average"])
         else:
             st.info("No progress data yet")
