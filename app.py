@@ -105,7 +105,7 @@ if st.button("Analyze"):
     st.bar_chart(df.set_index("Subjects"))
 
         # 🚨 Smart Alerts
-        st.subheader("⚠️ Smart Alerts")
+st.subheader("⚠️ Smart Alerts")
     
         if avg < 50:
             st.error("🚨 Your performance is very low!")
