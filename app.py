@@ -71,7 +71,7 @@ if st.session_state.user:
 
     if st.button("Analyze"):
 
-    # marks list
+    # Marks
     marks = [maths, science, english, sinhala, history, ict]
     subjects = ["Maths", "Science", "English", "Sinhala", "History", "ICT"]
 
@@ -80,6 +80,7 @@ if st.session_state.user:
     weak = subjects[marks.index(min(marks))]
     strong = subjects[marks.index(max(marks))]
 
+    # Results
     st.subheader("📊 Results")
     st.write(f"Average: {round(avg,2)}")
     st.write(f"Weak Subject: {weak}")
@@ -119,24 +120,27 @@ if st.session_state.user:
     for p in plan:
         st.write("✅ " + p)
 
-   # 🎥 YouTube Links
-st.subheader("🎥 Learning Resources")
+    # 🎥 YouTube Links
+    st.subheader("🎥 Learning Resources")
 
-youtube_links = {
-    "Maths": "https://www.youtube.com/results?search_query=maths+lessons",
-    "Science": "https://www.youtube.com/results?search_query=science+lessons",
-    "English": "https://www.youtube.com/results?search_query=english+grammar",
-    "Sinhala": "https://www.youtube.com/results?search_query=sinhala+lessons",
-    "History": "https://www.youtube.com/results?search_query=history+lessons",
-    "ICT": "https://www.youtube.com/results?search_query=ict+lessons"
-}
+    youtube_links = {
+        "Maths": "https://www.youtube.com/results?search_query=maths+lessons",
+        "Science": "https://www.youtube.com/results?search_query=science+lessons",
+        "English": "https://www.youtube.com/results?search_query=english+grammar",
+        "Sinhala": "https://www.youtube.com/results?search_query=sinhala+lessons",
+        "History": "https://www.youtube.com/results?search_query=history+lessons",
+        "ICT": "https://www.youtube.com/results?search_query=ict+lessons"
+    }
 
-link = youtube_links.get(weak)
+    link = youtube_links.get(weak)
 
-st.write(f"📺 Learn {weak}:")
-st.markdown(f"[Click here to watch]({link})")
+    st.write(f"📺 Learn {weak}:")
+    st.markdown(f"[Click here to watch]({link})")
 
-        # Firebase save
+    # ✅ Name validation + Firebase save
+    if name.strip() == "":
+        st.error("❌ Please enter student name")
+    else:
         try:
             db.child("students").push({
                 "name": name,
@@ -146,11 +150,12 @@ st.markdown(f"[Click here to watch]({link})")
         except Exception as e:
             st.error(e)
 
-        df = pd.DataFrame({
-            "Subjects": subjects,
-            "Marks": marks
-        })
-        st.bar_chart(df.set_index("Subjects"))
+    # Chart
+    df = pd.DataFrame({
+        "Subjects": subjects,
+        "Marks": marks
+    })
+    st.bar_chart(df.set_index("Subjects"))
 
     # 📈 Progress Tracker
     st.subheader("📈 Progress Tracker")
