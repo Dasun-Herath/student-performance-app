@@ -119,21 +119,22 @@ if st.session_state.user:
     for p in plan:
         st.write("✅ " + p)
 
-    # 🎥 YouTube Links
-    st.subheader("🎥 Learning Resources")
+   # 🎥 YouTube Links
+st.subheader("🎥 Learning Resources")
 
-    youtube_links = {
-        "Maths": "https://www.youtube.com/results?search_query=maths+lessons",
-        "Science": "https://www.youtube.com/results?search_query=science+lessons",
-        "English": "https://www.youtube.com/results?search_query=english+grammar",
-        "Sinhala": "https://www.youtube.com/results?search_query=sinhala+lessons",
-        "History": "https://www.youtube.com/results?search_query
-    }
-        
-        link = youtube_links.get(weak)
+youtube_links = {
+    "Maths": "https://www.youtube.com/results?search_query=maths+lessons",
+    "Science": "https://www.youtube.com/results?search_query=science+lessons",
+    "English": "https://www.youtube.com/results?search_query=english+grammar",
+    "Sinhala": "https://www.youtube.com/results?search_query=sinhala+lessons",
+    "History": "https://www.youtube.com/results?search_query=history+lessons",
+    "ICT": "https://www.youtube.com/results?search_query=ict+lessons"
+}
 
-        st.write(f"📺 Learn {weak}:")
-        st.markdown(f"[Click here to watch]({link})")
+link = youtube_links.get(weak)
+
+st.write(f"📺 Learn {weak}:")
+st.markdown(f"[Click here to watch]({link})")
 
         # Firebase save
         try:
