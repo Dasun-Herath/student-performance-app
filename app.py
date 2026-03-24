@@ -92,6 +92,17 @@ if st.button("Analyze"):
 
     avg = sum(marks) / len(marks)
 
+    if avg >= 75:
+    grade = "A"
+elif avg >= 65:
+    grade = "B"
+elif avg >= 50:
+    grade = "C"
+else:
+    grade = "F"
+
+st.write("Grade:", grade)
+
     weak = subjects[marks.index(min(marks))]
     strong = subjects[marks.index(max(marks))]
 
