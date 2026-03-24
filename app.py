@@ -85,7 +85,6 @@ elif st.session_state.page == "app":
 
    if st.button("Analyze"):
 
-    # ================= DATA =================
     marks = [maths, science, english, sinhala, history, ict]
     subjects = ["Maths", "Science", "English", "Sinhala", "History", "ICT"]
 
@@ -94,30 +93,28 @@ elif st.session_state.page == "app":
     weak = subjects[marks.index(min(marks))]
     strong = subjects[marks.index(max(marks))]
 
-    # ================= RESULTS =================
-    st.subheader("📊 Results")
-    st.write(f"Average: {round(avg,2)}")
-    st.write(f"Weak Subject: {weak}")
-    st.write(f"Strong Subject: {strong}")
+    st.subheader("Results")
+    st.write("Average:", round(avg,2))
+    st.write("Weak Subject:", weak)
+    st.write("Strong Subject:", strong)
 
-    # ================= SAVE =================
     if name.strip() == "":
-        st.error("❌ Please enter student name")
+        st.error("Enter name")
     else:
         try:
             db.child("students").push({
                 "name": name,
                 "average": avg
             })
-            st.success("Saved to Firebase ✅")
+            st.success("Saved")
         except Exception as e:
             st.error(e)
 
-    # ================= CHART =================
     df = pd.DataFrame({
         "Subjects": subjects,
         "Marks": marks
     })
+
     st.bar_chart(df.set_index("Subjects"))
     
         avg = sum(marks) / len(marks)
