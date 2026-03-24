@@ -171,6 +171,40 @@ if st.session_state.user:
     except Exception as e:
         st.error(e)
 
+    # 🏆 LEADERBOARD
+
+st.subheader("🏆 Student Leaderboard")
+
+try:
+    data = db.child("students").get()
+    records = []
+
+    if data.each():
+        for item in data.each():
+            records.append(item.val())
+
+    if records:
+        df_leaderboard = pd.DataFrame(records)
+
+        # sort by average (high to low)
+        df_leaderboard = df_leaderboard.sort_values(by="average", ascending=False)
+
+        st.dataframe(df_leaderboard)
+
+        # Top 3 highlight
+        st.subheader("🥇 Top 3 Students")
+
+        top3 = df_leaderboard.head(3)
+
+        for i, row in top3.iterrows():
+            st.write(f"🏅 {row['name']} - {round(row['average'],2)}")
+
+    else:
+        st.info("No leaderboard data yet")
+
+except Exception as e:
+    st.error(e)
+
     # 🤖 AI Chatbot
     st.subheader("🤖 AI Assistant")
 
