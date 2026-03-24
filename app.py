@@ -35,13 +35,14 @@ if st.session_state.page == "login":
     password = st.text_input("Password", type="password")
 
     if st.button("Login"):
-        try:
-            user = auth.sign_in_with_email_and_password(email, password)
-            st.session_state.user = user
-            st.session_state.page = "app"
-            st.success("Login success ✅")
-        except Exception as e:
-            st.error(e)
+    try:
+        user = auth.sign_in_with_email_and_password(email, password)
+        st.session_state.user = user
+        st.session_state.page = "app"
+        st.success("Login success ✅")
+        st.rerun()   # 🔥 IMPORTANT LINE
+    except Exception as e:
+        st.error(e)
 
     if st.button("Go to Signup"):
         st.session_state.page = "signup"
