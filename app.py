@@ -84,7 +84,7 @@ if st.session_state.user:
         st.write(f"Weak Subject: {weak}")
         st.write(f"Strong Subject: {strong}")
 
-        # 🚨 SMART ALERT
+        # 🚨 Smart Alerts
         st.subheader("⚠️ Smart Alerts")
 
         if avg < 50:
@@ -100,25 +100,40 @@ if st.session_state.user:
         if study_hours < 2:
             st.warning("⏰ Increase study hours")
 
-        # 📚 STUDY PLAN
+        # 📚 Study Plan
         st.subheader("📚 Study Plan")
 
         plan = []
 
         if study_hours <= 2:
             plan.append(f"Focus 1 hour on {weak}")
-            plan.append("Revise basic concepts")
+            plan.append("Revise basics")
         elif study_hours <= 5:
             plan.append(f"Spend 2 hours on {weak}")
-            plan.append(f"1 hour practice on {strong}")
-            plan.append("Revise notes daily")
+            plan.append(f"1 hour on {strong}")
         else:
             plan.append(f"Deep study 3 hours on {weak}")
-            plan.append("Solve past papers")
-            plan.append("Group study / discussion")
+            plan.append("Practice papers")
 
         for p in plan:
             st.write("✅ " + p)
+
+        # 🎥 YouTube Links
+        st.subheader("🎥 Learning Resources")
+
+        youtube_links = {
+            "Maths": "https://www.youtube.com/results?search_query=maths+lessons",
+            "Science": "https://www.youtube.com/results?search_query=science+lessons",
+            "English": "https://www.youtube.com/results?search_query=english+grammar",
+            "Sinhala": "https://www.youtube.com/results?search_query=sinhala+lessons",
+            "History": "https://www.youtube.com/results?search_query=history+lessons",
+            "ICT": "https://www.youtube.com/results?search_query=ict+lessons"
+        }
+
+        link = youtube_links.get(weak)
+
+        st.write(f"📺 Learn {weak}:")
+        st.markdown(f"[Click here to watch]({link})")
 
         # Firebase save
         try:
