@@ -127,7 +127,7 @@ if st.session_state.user:
         "Science": "https://www.youtube.com/results?search_query=science+lessons",
         "English": "https://www.youtube.com/results?search_query=english+grammar",
         "Sinhala": "https://www.youtube.com/results?search_query=sinhala+lessons",
-        "History": "https://www.youtube.com/results?search_query"
+        "History": "https://www.youtube.com/results?search_query
     }
         
         link = youtube_links.get(weak)
